@@ -1,6 +1,8 @@
 # kaggle submissions and old notebooks
-/submissions/
-*/archive/
+*keys.py
+*archive*
+*embedding_model*
+*vector_index*
 
 # playlist data
 *.pkl
