@@ -1,8 +1,12 @@
 # kaggle submissions and old notebooks
-*keys.py
+
 *archive*
 *embedding_model*
 *vector_index*
+
+# Secrets
+*secrets*
+*keys.py
 
 # playlist data
 *.pkl
