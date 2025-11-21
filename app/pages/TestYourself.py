@@ -7,12 +7,13 @@ st.title("Input Page")
 #     st.write("You entered:", user_input)
 sex_value = st.radio("Select your Sex:", ["Female", "Male"], horizontal=True,
                      help="The model was only trained with binary sex data, therefore we cannot offer non-binary sex options at this time.")
+
 # age
 age_value = st.number_input("Enter your age:", min_value=1, 
                             max_value=120, value=30)
 
 # smoking
-sex_value = st.radio("Were you ever a smoker?", ["No", "Yes"], 
+smoker_value = st.radio("Were you ever a smoker?", ["No", "Yes"], 
                      horizontal=True)
 
 # diabetes
@@ -30,3 +31,14 @@ weight_value = st.number_input("Enter your weight in kg:",
 # BMI
 bmi_value = weight_value / ((hight_value / 100) ** 2)
 st.write("Your BMI is:", str(round(bmi_value, 2)))
+
+if sex_value:
+    st.session_state["sex_value"] = sex_value
+if age_value:
+    st.session_state["age_value"] = age_value
+if smoker_value:
+    st.session_state["smoker_value"] = smoker_value
+if diabetes_value:
+    st.session_state["diabetes_value"] = diabetes_value
+if bmi_value:
+    st.session_state["bmi_value"] = bmi_value 

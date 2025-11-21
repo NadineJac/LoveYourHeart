@@ -18,6 +18,24 @@ VECTOR_INDEX_DIR = os.path.normpath(VECTOR_INDEX_DIR)
 EMBEDDING_DIR = os.path.join(BASE_DIR, "..", "content", "embedding_model")
 EMBEDDING_DIR = os.path.normpath(EMBEDDING_DIR)
 
+# setup user profile
+user_profile = {}
+if "sex_value" in st.session_state:
+    user_profile["sex"] = st.session_state["sex_value"]
+if "age_value" in st.session_state:
+    user_profile["age"] = st.session_state["age_value"] 
+if "diabetes_value" in st.session_state:
+    user_profile["diabetes"] = st.session_state["diabetes_value"]
+if "bmi_value" in st.session_state:
+    user_profile["bmi"] = round(st.session_state["bmi_value"], 2)
+
+profile_text = ""
+if user_profile:
+    profile_text += "User profile information:\n"
+    for k, v in user_profile.items():
+        profile_text += f"- {k}: {v}\n"
+    profile_text += "\nUse this information when answering health-related questions.\n"
+
 # llm
 model = "llama-3.3-70b-versatile"
 
@@ -66,6 +84,10 @@ prefix_messages = [
     ),
     ChatMessage(
         role=MessageRole.SYSTEM, content="Keep your answers short and succinct."
+    ),
+        ChatMessage(
+        role=MessageRole.SYSTEM,
+        content=profile_text,
     ),
 ]
 
