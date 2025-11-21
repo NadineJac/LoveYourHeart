@@ -8,7 +8,12 @@ from llama_index.core.chat_engine import ContextChatEngine
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.base.llms.types import ChatMessage, MessageRole
 import streamlit as st
+import os
 
+# absolute path based on file location
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+VECTOR_INDEX_DIR = os.path.join(BASE_DIR, "..", "content", "vector_index")
+VECTOR_INDEX_DIR = os.path.normpath(VECTOR_INDEX_DIR)
 
 # llm
 model = "llama-3.3-70b-versatile"
@@ -30,7 +35,7 @@ embeddings = HuggingFaceEmbedding(
 
 # load Vector Database
 # allow_dangerous_deserialization is needed. Pickle files can be modified to deliver a malicious payload that results in execution of arbitrary code on your machine
-storage_context = StorageContext.from_defaults(persist_dir="./content/vector_index")
+storage_context = StorageContext.from_defaults(persist_dir=VECTOR_INDEX_DIR)#"./content/vector_index")
 vector_index = load_index_from_storage(storage_context, embed_model=embeddings)
 
 # retriever
