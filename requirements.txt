@@ -5,3 +5,11 @@ scipy
 matplotlib
 seaborn
 ydata_profiling 
+groq
+streamlit
+python-dotenv
+llama-index-core
+llama-index-llms-groq
+llama-index-readers-file
+llama-index-embeddings-huggingface
+llama-index-embeddings-instructor
