@@ -21,7 +21,7 @@ llm = Groq(
 
 # embeddings
 embedding_model = "danielheinz/e5-base-sts-en-de"#"sentence-transformers/all-MiniLM-L6-v2"
-embeddings_folder = "../content/embedding_model/"
+embeddings_folder = "./content/embedding_model/"
 
 embeddings = HuggingFaceEmbedding(
     model_name=embedding_model,
@@ -30,7 +30,7 @@ embeddings = HuggingFaceEmbedding(
 
 # load Vector Database
 # allow_dangerous_deserialization is needed. Pickle files can be modified to deliver a malicious payload that results in execution of arbitrary code on your machine
-storage_context = StorageContext.from_defaults(persist_dir="../content/vector_index")
+storage_context = StorageContext.from_defaults(persist_dir="./content/vector_index")
 vector_index = load_index_from_storage(storage_context, embed_model=embeddings)
 
 # retriever
