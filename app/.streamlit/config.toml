@@ -1,0 +1,6 @@
+[theme]
+primaryColor="#f43f5e"         # rose-500
+backgroundColor="#fff1f2"      # rose-50
+secondaryBackgroundColor="#ffe4e6"  # rose-100
+textColor="#4a001f"
+font="sans serif"
