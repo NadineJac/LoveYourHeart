@@ -15,6 +15,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 VECTOR_INDEX_DIR = os.path.join(BASE_DIR, "..", "content", "vector_index")
 VECTOR_INDEX_DIR = os.path.normpath(VECTOR_INDEX_DIR)
 
+EMBEDDING_DIR = os.path.join(BASE_DIR, "..", "content", "embedding_model")
+EMBEDDING_DIR = os.path.normpath(EMBEDDING_DIR)
+
 # llm
 model = "llama-3.3-70b-versatile"
 
@@ -26,7 +29,7 @@ llm = Groq(
 
 # embeddings
 embedding_model = "danielheinz/e5-base-sts-en-de"#"sentence-transformers/all-MiniLM-L6-v2"
-embeddings_folder = "./content/embedding_model/"
+embeddings_folder = EMBEDDING_DIR#"./content/embedding_model/"
 
 embeddings = HuggingFaceEmbedding(
     model_name=embedding_model,
