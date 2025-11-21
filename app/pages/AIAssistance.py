@@ -28,7 +28,7 @@ llm = Groq(
 
 
 # embeddings
-embedding_model = "danielheinz/e5-base-sts-en-de"#"sentence-transformers/all-MiniLM-L6-v2"
+embedding_model = "sentence-transformers/distiluse-base-multilingual-cased-v1"#"sentence-transformers/all-MiniLM-L6-v2"
 embeddings_folder = EMBEDDING_DIR#"./content/embedding_model/"
 
 embeddings = HuggingFaceEmbedding(
