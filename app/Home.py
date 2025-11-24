@@ -127,14 +127,17 @@ with sidebar_col:
         Get personalized answers in seconds, available 24/7.
     </div>
     ''', unsafe_allow_html=True)
-    
-    
+        
     st.markdown('''
     <div class="feature-box">
         <strong>💡 Actionable Advice</strong><br>
         Receive clear, achievable steps to improve your heart health.
     </div>
     ''', unsafe_allow_html=True)
+    if st.button("Learn more about the project →", type="primary", key="cta3"):
+        st.switch_page("pages/Background.py")
+
+
 
 st.write("")
 st.divider()
