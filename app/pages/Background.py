@@ -68,12 +68,13 @@ with col_left:
     st.markdown("### Data Sources")
     st.write("""
     The project uses publicly available health datasets to train predictive models:
-    - [Zenodo Health Dataset](https://zenodo.org/records/15364962 https://www.kaggle.com/datasets/iammustafatz/diabetes-prediction-dataset/data)
-    """)
+    - [BRFSS 2020 Heart Disease Dataset](https://zenodo.org/records/15364962)
+        """)
+    # [Diabetes prediction dataset](https://www.kaggle.com/datasets/iammustafatz/diabetes-prediction-dataset/data)
 
     st.markdown("### Further Information and Conatct")
     st.write("""Developed by [Haripriya Raghunathan](https://www.linkedin.com/in/haripriya-raghunathan-a237732a9/) and [Nadine Jacobsen](https://www.linkedin.com/in/nadine-jacobsen/) as part of the WBS Data Science Bootcamp final project.
-    For more details, visit the [GitHub repository](https://github.com/NadineJac/LoveYourHeart/tree/main""")
+    \n For more details, visit the [GitHub repository](https://github.com/NadineJac/LoveYourHeart/tree/main)""")
 
 with col_right:
     st.markdown("#### Why Use This Tool?")
