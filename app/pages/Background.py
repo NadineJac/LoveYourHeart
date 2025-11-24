@@ -72,7 +72,7 @@ with col_left:
         """)
     # [Diabetes prediction dataset](https://www.kaggle.com/datasets/iammustafatz/diabetes-prediction-dataset/data)
 
-    st.markdown("### Further Information and Conatct")
+    st.markdown("### Contact")
     st.write("""Developed by [Haripriya Raghunathan](https://www.linkedin.com/in/haripriya-raghunathan-a237732a9/) and [Nadine Jacobsen](https://www.linkedin.com/in/nadine-jacobsen/) as part of the WBS Data Science Bootcamp final project.
     \n For more details, visit the [GitHub repository](https://github.com/NadineJac/LoveYourHeart/tree/main)""")
 
