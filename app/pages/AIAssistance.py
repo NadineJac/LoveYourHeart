@@ -27,6 +27,8 @@ if "diabetes_value" not in st.session_state:
     st.session_state["diabetes_value"] = None
 if "bmi_value" not in st.session_state:
     st.session_state["bmi_value"] = None
+if "risk_value" not in st.session_state:
+    st.session_state["risk_value"] = "Whaaa"#None
 
 # setup user profile
 user_profile = {}
@@ -40,6 +42,8 @@ if st.session_state.get("diabetes_value"):
     user_profile["diabetes"] = st.session_state["diabetes_value"]
 if st.session_state.get("bmi_value"):
     user_profile["bmi"] = round(st.session_state["bmi_value"], 2)
+if st.session_state.get("risk_value"):
+    user_profile["risk"] = st.session_state["risk_value"]
 
 profile_text = ""
 if user_profile:

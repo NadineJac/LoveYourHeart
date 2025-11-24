@@ -72,18 +72,6 @@ with col_left:
 
     # Submit button to save profile
     if st.button("💾 Save Profile", type="primary", use_container_width=True):
-        # Save all values to session state
-        st.session_state["sex_value"] = sex_value
-        st.session_state["age_value"] = age_value
-        st.session_state["smoker_value"] = smoker_value
-        st.session_state["diabetes_value"] = diabetes_value
-        st.session_state["height_value"] = height_value
-        st.session_state["weight_value"] = weight_value
-        st.session_state["bmi_value"] = bmi_value
-        st.session_state["profile_submitted"] = True
-        
-        st.toast("Profile saved! Head to the AI Assistant page to get personalized advice.", icon="✅")
-        #st.success("✅ Profile saved! Head to the AI Assistant page to get personalized advice.")
 
         with col_right:
             st.write('''
@@ -105,6 +93,19 @@ with col_left:
             })
 
             prediction = model.predict(user)
+            st.session_state["risk_value"] = prediction[0]
 
             # st.markdown
             st.write("### Are you at risk of heart disease:", prediction[0])
+                    # Save all values to session state
+        st.session_state["sex_value"] = sex_value
+        st.session_state["age_value"] = age_value
+        st.session_state["smoker_value"] = smoker_value
+        st.session_state["diabetes_value"] = diabetes_value
+        st.session_state["height_value"] = height_value
+        st.session_state["weight_value"] = weight_value
+        st.session_state["bmi_value"] = bmi_value
+        st.session_state["profile_submitted"] = True
+        
+        st.toast("Profile saved! Head to the AI Assistant page to get personalized advice.", icon="✅")
+        #st.success("✅ Profile saved! Head to the AI Assistant page to get personalized advice.")
