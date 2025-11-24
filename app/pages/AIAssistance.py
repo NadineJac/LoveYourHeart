@@ -118,8 +118,9 @@ else:
     st.session_state.rag_bot._prefix_messages = create_prefix_messages()
 
 ##### streamlit #####
-
-st.title("Love Your Heart: AI assistance for Heart Health")
+# Page config
+st.set_page_config(page_title="AI Assistant", page_icon="❤️", layout="wide")
+st.title("❤️ AI assistant")
 
 # Display user profile if available
 if user_profile:
