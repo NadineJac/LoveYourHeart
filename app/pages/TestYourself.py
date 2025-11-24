@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 # Page config
 st.set_page_config(page_title="Test Yourself", page_icon="❤️", layout="wide")
 
@@ -91,7 +92,9 @@ with col_left:
                      Proceed with caution and confer with the AI Assistant to 
                      get personalized adviced based on research literature.''')
             import pickle
-            model = pickle.load(open('../models/trained_pipe_logReg.sav', 'rb'))
+            PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+            MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_logReg.sav")
+            model = pickle.load(open(MODEL_PATH, 'rb'))
 
             import pandas as pd
             user = pd.DataFrame({
