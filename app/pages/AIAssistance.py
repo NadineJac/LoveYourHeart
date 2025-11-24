@@ -28,7 +28,7 @@ if "diabetes_value" not in st.session_state:
 if "bmi_value" not in st.session_state:
     st.session_state["bmi_value"] = None
 if "risk_value" not in st.session_state:
-    st.session_state["risk_value"] = "Whaaa"#None
+    st.session_state["risk_value"] = None
 
 # setup user profile
 user_profile = {}
