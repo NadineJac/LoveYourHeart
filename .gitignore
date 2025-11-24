@@ -37,7 +37,7 @@ Thumbs.db
 *.so
 
 # Distribution / packaging
-*.sav
+#*.sav get model online for streamlit
 .Python
 build/
 develop-eggs/

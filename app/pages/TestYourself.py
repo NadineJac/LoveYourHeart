@@ -85,4 +85,23 @@ with col_left:
         #st.success("✅ Profile saved! Head to the AI Assistant page to get personalized advice.")
 
         with col_right:
-            st.write("No risk estimation implemented yet. In the meantime, proceed to the AI Assistant to get personalized adviced based on research literature.")
+            st.write('''
+                     ❗No proper risk estimation implemented yet. 
+                     Current estimation only based on sex, smoking, diabetes and BMI.
+                     Proceed with caution and confer with the AI Assistant to 
+                     get personalized adviced based on research literature.''')
+            import pickle
+            model = pickle.load(open('../models/trained_pipe_logReg.sav', 'rb'))
+
+            import pandas as pd
+            user = pd.DataFrame({
+                'BMI':[bmi_value], 
+                'Smoking':[smoker_value], 
+                'Sex':[sex_value],
+                'Diabetic': [diabetes_value]
+            })
+
+            prediction = model.predict(user)
+
+            # st.markdown
+            st.write("### Are you at risk of heart disease:", prediction[0])
