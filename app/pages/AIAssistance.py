@@ -21,6 +21,8 @@ if "sex_value" not in st.session_state:
     st.session_state["sex_value"] = None
 if "age_value" not in st.session_state:
     st.session_state["age_value"] = None
+if "smoker_value" not in st.session_state:
+    st.session_state["smoker_value"] = None
 if "diabetes_value" not in st.session_state:
     st.session_state["diabetes_value"] = None
 if "bmi_value" not in st.session_state:
@@ -32,6 +34,8 @@ if st.session_state.get("sex_value"):
     user_profile["sex"] = st.session_state["sex_value"]
 if st.session_state.get("age_value"):
     user_profile["age"] = st.session_state["age_value"] 
+if st.session_state.get("smoker_value"):
+    user_profile["smoker"] = st.session_state["smoker_value"]
 if st.session_state.get("diabetes_value"):
     user_profile["diabetes"] = st.session_state["diabetes_value"]
 if st.session_state.get("bmi_value"):
