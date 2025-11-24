@@ -14,7 +14,7 @@ sex_value = st.radio(
     ["Female", "Male"], 
     horizontal=True,
     help="The model was only trained with binary sex data, therefore we cannot offer non-binary sex options at this time.",
-    index=0 if not st.session_state.get("sex_value") else (0 if st.session_state.get("sex_value") == "Female" else 1)
+    index=0 if st.session_state.get("sex_value") != "Yes" else 1
 )
 
 # Age
@@ -30,7 +30,7 @@ smoker_value = st.radio(
     "Were you ever a smoker?", 
     ["No", "Yes"], 
     horizontal=True,
-    index=0 if not st.session_state.get("smoker_value") else (0 if st.session_state.get("smoker_value") == "No" else 1)
+    index=0 if st.session_state.get("smoker_value") != "Yes" else 1
 )
 
 # Diabetes
@@ -38,7 +38,7 @@ diabetes_value = st.radio(
     "Do you have diabetes?", 
     ["No", "Yes"], 
     horizontal=True,
-    index=0 if not st.session_state.get("diabetes_value") else (0 if st.session_state.get("diabetes_value") == "No" else 1)
+    index=0 if st.session_state.get("diabetes_value") != "Yes" else 1
 )
 
 # Height
@@ -78,23 +78,5 @@ with col2:
         st.session_state["bmi_value"] = bmi_value
         st.session_state["profile_submitted"] = True
         
-        st.success("✅ Profile saved! Head to the AI Assistant page to get personalized advice.")
-        st.balloons()
-
-# Show current profile if it exists
-if st.session_state.get("profile_submitted"):
-    st.write("---")
-    st.subheader("📋 Your Current Profile")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.write(f"**Sex:** {st.session_state.get('sex_value', 'Not set')}")
-        st.write(f"**Age:** {st.session_state.get('age_value', 'Not set')}")
-        st.write(f"**Smoker:** {st.session_state.get('smoker_value', 'Not set')}")
-    
-    with col2:
-        st.write(f"**Diabetes:** {st.session_state.get('diabetes_value', 'Not set')}")
-        st.write(f"**Height:** {st.session_state.get('height_value', 'Not set')} cm")
-        st.write(f"**Weight:** {st.session_state.get('weight_value', 'Not set')} kg")
-    
-    st.write(f"**BMI:** {round(st.session_state.get('bmi_value', 0), 2)}")
+        st.toast("Profile saved! Head to the AI Assistant page to get personalized advice.", icon="✅")
+        #st.success("✅ Profile saved! Head to the AI Assistant page to get personalized advice.")
