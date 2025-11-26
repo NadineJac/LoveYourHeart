@@ -24,28 +24,6 @@ st.markdown("""
     justify-content: space-between;
     margin-top: 1.5rem;
     }
-    .stat-card {
-        flex: 1;
-        padding: 1.25rem;
-        border-radius: 12px;
-        background-color: var(--secondary-background-color);
-    }
-    .stat-icon {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-    }
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 700;
-    }
-    .stat-title {
-        font-weight: 600;
-        margin-top: 0.25rem;
-    }
-    .stat-subtitle {
-        font-size: 0.9rem;
-        opacity: 0.7;
-    }
     .step-number {
         display: inline-block;
         width: 40px;
