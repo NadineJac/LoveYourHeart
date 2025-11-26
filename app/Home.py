@@ -18,6 +18,34 @@ st.markdown("""
         color: #666;
         margin-bottom: 0.5rem;
     }
+            .stats-container {
+    display: flex;
+    gap: 2rem;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+    }
+    .stat-card {
+        flex: 1;
+        padding: 1.25rem;
+        border-radius: 12px;
+        background-color: var(--secondary-background-color);
+    }
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+    .stat-title {
+        font-weight: 600;
+        margin-top: 0.25rem;
+    }
+    .stat-subtitle {
+        font-size: 0.9rem;
+        opacity: 0.7;
+    }
     .step-number {
         display: inline-block;
         width: 40px;
@@ -48,7 +76,38 @@ col_left, col_right = st.columns([3, 2], gap="large")
 
 with col_left:
     st.markdown('<h1 class="big-title">❤️ Love Your Heart</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="subtitle">AI-powered insights for better cardiovascular health</p>', unsafe_allow_html=True)
+    st.markdown(
+        '<p class="subtitle">AI-powered insights for better cardiovascular health</p>',
+        unsafe_allow_html=True
+    )
+    st.write("")
+    # Horizontal layout
+    col1, col2, col3 = st.columns(3, gap="medium")
+
+    col1.metric(
+        label="Global Impact",
+        value="10,000",
+        delta="deaths/day (WHO Europe)",
+        delta_color="off",
+        border=True
+    )
+
+    col2.metric(
+        label="US Heart Attack Rate",
+        value="Every 40 sec",
+        delta="1 Heart Attack in the USA",
+                delta_color="off",
+        border=True
+    )
+
+    col3.metric(
+        label="Preventable",
+        value="Up to 90%",
+        delta="of heart disease can be prevented",
+        delta_color="off",
+        border=True
+    )
+
 
 with col_right:
     st.markdown("#### Understand Your Risk")
