@@ -195,13 +195,37 @@ with col_left:
             default=st.session_state.get("stroke_value")
         )
 
+        # Add some spacing
 
+        st.write("")
+        required_fields = {
+        "sex": sex_value,
+        "age": age_value,
+        "race": race_cat,
+        "general_health": health_cat,
+        "sleep": sleep_value,
+        "smoking": smoker_value,
+        "diabetes": diabetes_value,
+        "height": height_value,
+        "weight": weight_value,
+        "alcohol": alc_value,
+        "stroke": stroke_value,
+        "asthma": astma_value,
+        "kidney": kidney_value,
+        "skin_cancer": skin_value,
+        "exercise": excercise_value,
+        "mental_health": mentalhealth_value,
+        "difficulty_walking": walk_value,
+    }
 
-    # Add some spacing
-    st.write("")
-
+    st.write(":gray[Please fill out all fields to enable saving your profile.]", )
+    all_filled = all(v not in (None, "", []) for v in required_fields.values())
     # Submit button to save profile
-    if st.button("💾 Save Profile", type="primary", use_container_width=True):
+    if st.button("💾 Save Profile",
+        type="primary",
+        use_container_width=True,
+        disabled=not all_filled):
+
         # Save all values to session state FIRST
         st.session_state["sex_value"] = sex_value
         st.session_state["age_value"] = age_value
