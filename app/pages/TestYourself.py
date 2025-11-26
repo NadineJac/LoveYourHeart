@@ -84,6 +84,14 @@ with col_left:
             index=race_options.index(st.session_state.race_cat) if "race_cat" in st.session_state and st.session_state.race_cat in race_options else None
         )
         
+        
+
+    with st.expander("General Health and Lifestyle"): 
+        health_cat = st.segmented_control(
+            "How would you rate your general health?", 
+            ["Excellent", "Very good", "Good", "Fair", "Poor"], 
+            default=st.session_state.get("health_cat")
+        )
         # Height
         height_value = st.number_input(
             "Enter your height in cm:", 
@@ -105,13 +113,6 @@ with col_left:
             bmi_value = weight_value / ((height_value / 100) ** 2)
             st.info(f"📊 Your BMI is: **{round(bmi_value, 2)}**")
 
-    with st.expander("General Health and Lifestyle"): 
-        health_cat = st.segmented_control(
-            "How would you rate your general health?", 
-            ["Excellent", "Very good", "Good", "Fair", "Poor"], 
-            default=st.session_state.get("health_cat")
-        )
-
         # Sleep	
         sleep_value = st.select_slider(
             "How many hours of sleep do you get?", 
@@ -120,21 +121,6 @@ with col_left:
             value=st.session_state.get("sleep_value")
         )
     
-        st.write("**On how many days in the last 30 days:**")
-        # Excercise
-        excercise_value = st.select_slider(
-            "Did you excercise?", 
-            range(0, 31), 
-            value=st.session_state.get("excercise_value")
-        )
-        # Mental health
-        mentalhealth_value = st.select_slider(
-            "Was your mental health poor?", 
-            range(0, 31), 
-            value=st.session_state.get("mentalhealth_value"),
-            help="This includes stress, depression, and problems with emotions."
-        )
-        st.write("")
         # Difficulty walking
         walk_value = st.segmented_control(
             "Do you have trouble walking or climbing stairs?", 
@@ -160,6 +146,20 @@ with col_left:
                 alc_cat = "Yes"
             else:
                 alc_cat = "No"
+        st.write("**On how many days in the last 30 days:**")
+        # Excercise
+        excercise_value = st.select_slider(
+            "Did you excercise?", 
+            range(0, 31), 
+            value=st.session_state.get("excercise_value")
+        )
+        # Mental health
+        mentalhealth_value = st.select_slider(
+            "Was your mental health poor?", 
+            range(0, 31), 
+            value=st.session_state.get("mentalhealth_value"),
+            help="This includes stress, depression, and problems with emotions."
+        )
 
     with st.expander("Disease History"):
         # Diabetes

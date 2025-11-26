@@ -17,33 +17,53 @@ EMBEDDING_DIR = os.path.join(BASE_DIR, "..", "content", "embedding_model")
 EMBEDDING_DIR = os.path.normpath(EMBEDDING_DIR)
 
 # Initialize session state keys if they don't exist
-if "sex_value" not in st.session_state:
-    st.session_state["sex_value"] = None
-if "age_value" not in st.session_state:
-    st.session_state["age_value"] = None
-if "smoker_value" not in st.session_state:
-    st.session_state["smoker_value"] = None
-if "diabetes_value" not in st.session_state:
-    st.session_state["diabetes_value"] = None
-if "bmi_value" not in st.session_state:
-    st.session_state["bmi_value"] = None
-if "risk_value" not in st.session_state:
-    st.session_state["risk_value"] = None
+# if "sex_value" not in st.session_state:
+#     st.session_state["sex_value"] = None
+# if "age_value" not in st.session_state:
+#     st.session_state["age_value"] = None
+# if "smoker_value" not in st.session_state:
+#     st.session_state["smoker_value"] = None
+# if "diabetes_value" not in st.session_state:
+#     st.session_state["diabetes_value"] = None
+# if "bmi_value" not in st.session_state:
+#     st.session_state["bmi_value"] = None
+# if "risk_value" not in st.session_state:
+#     st.session_state["risk_value"] = None
 
 # setup user profile
 user_profile = {}
 if st.session_state.get("sex_value"):
     user_profile["sex"] = st.session_state["sex_value"]
 if st.session_state.get("age_value"):
-    user_profile["age"] = st.session_state["age_value"] 
+    user_profile["age"] = st.session_state["age_value"]
+if st.session_state.get("race_cat"):
+    user_profile["race"] = st.session_state["race_cat"]
+if st.session_state.get("health_cat"):
+    user_profile["general_health"] = st.session_state["health_cat"]
+if st.session_state.get("sleep_value"):
+    user_profile["sleep_time"] = (f"{st.session_state['sleep_value']} hours/day")
 if st.session_state.get("smoker_value"):
-    user_profile["smoker"] = st.session_state["smoker_value"]
+    user_profile["smoking"] = st.session_state["smoker_value"]
 if st.session_state.get("diabetes_value"):
-    user_profile["diabetes"] = st.session_state["diabetes_value"]
+    user_profile["diabetic"] = st.session_state["diabetes_value"]
 if st.session_state.get("bmi_value"):
-    user_profile["bmi"] = round(st.session_state["bmi_value"], 2)
-if st.session_state.get("risk_value"):
-    user_profile["risk"] = st.session_state["risk_value"]
+    user_profile["bmi"] = round(st.session_state["bmi_value"],2)
+if st.session_state.get("alc_cat"):
+    user_profile["alcohol_consumption"] = st.session_state["alc_cat"]
+if st.session_state.get("stroke_value"):
+    user_profile["stroke"] = st.session_state["stroke_value"]
+if st.session_state.get("astma_value"):
+    user_profile["asthma"] = st.session_state["astma_value"]
+if st.session_state.get("kidney_value"):
+    user_profile["kidney_disease"] = st.session_state["kidney_value"]
+if st.session_state.get("skin_value"):
+    user_profile["skin_cancer"] = st.session_state["skin_value"]
+if st.session_state.get("excercise_value"):
+    user_profile["physical_activity"] = (f"{st.session_state['excercise_value']} days/month")
+if st.session_state.get("mentalhealth_value"):
+    user_profile["mental_health_poor"] = (f"{st.session_state['mentalhealth_value']} days/month")
+if st.session_state.get("walk_value"):
+    user_profile["difficulty_walking"] = st.session_state["walk_value"]
 
 profile_text = ""
 if user_profile:
@@ -131,10 +151,49 @@ st.set_page_config(page_title="AI Assistant", page_icon="❤️", layout="wide")
 st.title("❤️ AI assistant")
 
 # Display user profile if available
+PROFILE_GROUPS = {
+    "Demographic": [
+        "sex",
+        "age",
+        "race",
+    ],
+    "General Health": [
+        "general_health",
+        "bmi",
+        "sleep_time",
+        "physical_activity",
+        "mental_health_days",
+        "difficulty_walking",
+        "smoking",
+        "alcohol_category",
+    ],
+    "Diseases": [
+        "diabetic",
+        "stroke",
+        "asthma",
+        "kidney_disease",
+        "skin_cancer",
+    ],
+}
+
 if user_profile:
     with st.expander("📋 Your Profile", expanded=False):
-        for k, v in user_profile.items():
-            st.write(f"**{k.capitalize()}:** {v}")
+
+        col1, col2, col3 = st.columns(3)
+
+        columns = {
+            "Demographic": col1,
+            "General Health": col2,
+            "Diseases": col3,
+        }
+
+        for group, keys in PROFILE_GROUPS.items():
+            with columns[group]:
+                st.markdown(f"### {group}")
+                for key in keys:
+                    if key in user_profile:
+                        label = key.replace("_", " ").title()
+                        st.write(f"**{label}:** {user_profile[key]}")
 else:
     st.info("👈 Complete your profile in the **TestYourself** page for personalized health advice!")
 
