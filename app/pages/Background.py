@@ -67,10 +67,17 @@ with col_left:
 
     st.markdown("### Data Sources")
     st.write("""
-    The project uses publicly available health datasets to train predictive models:
-    - [BRFSS 2020 Heart Disease Dataset](https://zenodo.org/records/15364962)
+    The project uses publicly available health datasets based on the Behavioral Risk Factor Surveillance System (BRFSS) to train predictive models:
+    [BRFSS 2020 Heart Disease Dataset](https://zenodo.org/records/15364962)
         """)
-    # [Diabetes prediction dataset](https://www.kaggle.com/datasets/iammustafatz/diabetes-prediction-dataset/data)
+    with st.expander("Learn more about BRFSS data"):
+        st.write("""
+The Behavioral Risk Factor Surveillance System (BRFSS) is the largest continuously conducted health survey system in the world, established in 1984 and now collecting data in all 50 U.S. states, the District of Columbia, and three U.S. territories. BRFSS completes more than 400,000 adult interviews each year, making it an invaluable resource for understanding health behaviors and outcomes.
+The BRFSS collects comprehensive data on health-related risk behaviors, chronic health conditions, and the use of preventive services among adults aged 18 and older. This includes information about physical activity, diet, tobacco use, alcohol consumption, blood pressure, cholesterol levels, diabetes, and many other factors that influence cardiovascular health.
+Our heart attack risk prediction model is built on this robust, real-world dataset, allowing us to provide you with evidence-based insights into your personal risk profile. The BRFSS data reflects the experiences of hundreds of thousands of Americans, making our predictions grounded in actual health outcomes rather than theoretical models alone.
+By using BRFSS data, we're able to identify patterns and risk factors that have been validated across diverse populations, geographic regions, and demographic groups. This means your risk assessment is based on one of the most comprehensive and reliable health datasets available.
+    """)
+        # [Diabetes prediction dataset](https://www.kaggle.com/datasets/iammustafatz/diabetes-prediction-dataset/data)
 
     st.markdown("### Contact")
     st.write("""Developed by [Haripriya Raghunathan](https://www.linkedin.com/in/haripriya-raghunathan-a237732a9/) and [Nadine Jacobsen](https://www.linkedin.com/in/nadine-jacobsen/) as part of the WBS Data Science Bootcamp final project.
