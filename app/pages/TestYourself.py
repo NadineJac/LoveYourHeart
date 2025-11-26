@@ -270,3 +270,5 @@ with col_left:
                     get personalized adviced based on research literature.''')
             st.write("### Are you at risk of heart disease:", st.session_state["risk_value"])
             st.success("✅ Profile saved! Head to the AI Assistant page to get personalized advice.")
+            if st.button("Go to AI Assistant →", key="cta4"):
+                st.switch_page("pages/AIAssistance.py")
