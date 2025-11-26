@@ -153,6 +153,14 @@ with col_left:
             range(0, 31), 
             value=st.session_state.get("excercise_value")
         )
+        # Physical health
+        physhealth_value = st.select_slider(
+            "Was your physical health not good?", 
+            range(0, 31), 
+            value=st.session_state.get("physhealth_value"),
+            help="This includes physical illness and injury."
+        )
+
         # Mental health
         mentalhealth_value = st.select_slider(
             "Was your mental health poor?", 
@@ -196,8 +204,8 @@ with col_left:
         )
 
         # Add some spacing
-
         st.write("")
+
         required_fields = {
         "sex": sex_value,
         "age": age_value,
@@ -216,12 +224,13 @@ with col_left:
         "exercise": excercise_value,
         "mental_health": mentalhealth_value,
         "difficulty_walking": walk_value,
+        "physhealth_value": physhealth_value
     }
 
     st.write(":gray[Please fill out all fields to enable saving your profile.]", )
     all_filled = all(v not in (None, "", []) for v in required_fields.values())
     # Submit button to save profile
-    if st.button("💾 Save Profile",
+    if st.button("💾 Save Profile & Get Risk Estimate",
         type="primary",
         use_container_width=True,
         disabled=not all_filled):
@@ -246,38 +255,41 @@ with col_left:
         st.session_state["skin_value"] = skin_value
         st.session_state["excercise_value"] = excercise_value
         st.session_state["mentalhealth_value"] = mentalhealth_value
-        st.session_state["walk_value"] = walk_value        
+        st.session_state["walk_value"] = walk_value   
+        st.session_state["physhealth_value"] = physhealth_value     
 
         
         # Load model and make prediction
         import pickle
         import pandas as pd
         PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-        MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_logReg.sav")
+        MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_gradBoost.sav")#logReg.sav")
         model = pickle.load(open(MODEL_PATH, 'rb'))
 
         user = pd.DataFrame({             
             'Sex': [sex_value],
             'Age': [age_value],
             'Race': [race_cat],
-            'Health': [health_cat],
-            'SleepDuration': [sleep_value],
+            'SleepTime': [sleep_value],
             'AgeCategory': [age_cat],
             'Smoking': [smoker_value], 
-            'Alcohol consumption': [alc_cat],
+            'AlcoholDrinking': [alc_cat],
             'BMI': [bmi_value],
             'Diabetic': [diabetes_value],                
             'Stroke': [stroke_value],
-            'Astma': [astma_value],
+            'Asthma': [astma_value],
             'KidneyDisease': [kidney_value],
             'SkinCancer': [skin_value],
-            'Exercise':[excercise_value],
+            'PhysicalActivity':[excercise_value],
             'MentalHealth': [mentalhealth_value],
-            'WalkingDifficulty': [walk_value]
+            'DiffWalking': [walk_value],
+            'GenHealth': [health_cat],
+            'PhysicalHealth': [physhealth_value] 
         })
 
-        prediction = model.predict(user)
-        st.session_state["risk_value"] = prediction[0]
+        #prediction = model.predict(user)
+        prediction = model.predict_proba(user)[:, 1] #>= 0.5
+        st.session_state["risk_value"] = round(prediction[0]*100,2)  # Store as percentage
         st.session_state["profile_submitted"] = True
         st.session_state["just_saved"] = True  # Flag to show we just saved
         
@@ -287,12 +299,17 @@ with col_left:
         # Display results in col_right
     if st.session_state["profile_submitted"]:
         with col_right:
-            st.write('''
-                    ❗No proper risk estimation implemented yet. 
-                    Current estimation only based on sex, smoking, diabetes and BMI.
+            st.success("✅ Profile saved! Head to the AI Assistant page to get personalized advice.")
+            st.warning('''⚠️ No proper risk estimation implemented yet. 
                     Proceed with caution and confer with the AI Assistant to 
                     get personalized adviced based on research literature.''')
-            st.write("### Are you at risk of heart disease:", st.session_state["risk_value"])
-            st.success("✅ Profile saved! Head to the AI Assistant page to get personalized advice.")
+            st.write("#### Your current heart attack risk factor:", str(st.session_state["risk_value"]),"%")
+            if st.session_state["risk_value"] >= 25:
+                st.error("🚨 High Risk! Please consult a healthcare professional for a comprehensive evaluation.")
+            elif st.session_state["risk_value"] >= 10:
+                st.warning("⚠️ Moderate Risk. Consider lifestyle changes and regular check-ups.") 
+            else:
+                st.info("✅ Low Risk. Maintain a healthy lifestyle to keep your risk low.")  
+                          
             if st.button("Go to AI Assistant →", key="cta4"):
                 st.switch_page("pages/AIAssistance.py")

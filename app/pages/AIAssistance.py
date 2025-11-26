@@ -64,6 +64,9 @@ if st.session_state.get("mentalhealth_value"):
     user_profile["mental_health_poor"] = (f"{st.session_state['mentalhealth_value']} days/month")
 if st.session_state.get("walk_value"):
     user_profile["difficulty_walking"] = st.session_state["walk_value"]
+if st.session_state.get("physhealth_value"):
+    user_profile["physical_health_poor"] = (f"{st.session_state["physhealth_value"]} days/month")
+
 
 profile_text = ""
 if user_profile:
@@ -162,7 +165,8 @@ PROFILE_GROUPS = {
         "bmi",
         "sleep_time",
         "physical_activity",
-        "mental_health_days",
+        "physical_health_poor",
+        "mental_health_poor",
         "difficulty_walking",
         "smoking",
         "alcohol_category",

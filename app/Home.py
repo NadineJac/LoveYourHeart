@@ -24,6 +24,7 @@ st.markdown("""
     justify-content: space-between;
     margin-top: 1.5rem;
     }
+
     .step-number {
         display: inline-block;
         width: 40px;
