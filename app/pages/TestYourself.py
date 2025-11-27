@@ -356,7 +356,8 @@ with col_left:
             ))
     
             fig.update_layout(
-                paper_bgcolor="white",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
                 height=450,
                 margin=dict(l=40, r=40, b=40, t=80)
             )
