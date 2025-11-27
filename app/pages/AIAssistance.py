@@ -66,6 +66,8 @@ if st.session_state.get("walk_value"):
     user_profile["difficulty_walking"] = st.session_state["walk_value"]
 if st.session_state.get("physhealth_value"):
     user_profile["physical_health_poor"] = (f"{st.session_state["physhealth_value"]} days/month")
+if st.session_state.get("risk_value"):
+    user_profile["risk"] = (f"{st.session_state["risk_value"]}%")
 
 
 profile_text = ""
@@ -159,6 +161,7 @@ PROFILE_GROUPS = {
         "sex",
         "age",
         "race",
+        "risk"
     ],
     "General Health": [
         "general_health",
@@ -198,27 +201,36 @@ if user_profile:
                     if key in user_profile:
                         label = key.replace("_", " ").title()
                         st.write(f"**{label}:** {user_profile[key]}")
+
+     # Only generate initial recommendation once
+    if 'initial_recommendation' not in st.session_state:
+        answer = st.session_state.rag_bot.chat("as bullet points with the following headings: helathy habits, Modifiable Risk Factors, Recommendations")
+        st.session_state.initial_recommendation = answer.response
+    
+    with st.expander("My recommendation for you:", expanded=True):
+        st.markdown(st.session_state.initial_recommendation)
 else:
     st.info("👈 Complete your profile in the **TestYourself** page for personalized health advice!")
 
+
+
 # Display chat messages from history on app rerun
-for message in st.session_state.rag_bot.chat_history:
+# Display chat messages from history on app rerun
+# Skip the initial recommendation messages (first 2messages)
+for message in st.session_state.rag_bot.chat_history[2:]:
     with st.chat_message(message.role):
         st.markdown(message.blocks[0].text)
 
 # React to user input
 if prompt := st.chat_input("Ask me anything!"):
-    # Display user message in chat message container
-    st.chat_message("human").markdown(prompt)
-
-    # Begin spinner before answering question so it's there for the duration
+    # The chat() method will add messages to history
     with st.spinner("Finding answers..."):
-        # send question to chain to get answer
         answer = st.session_state.rag_bot.chat(prompt)
-
-        # extract answer from dictionary returned by chain
-        response = answer.response
-
-        # Display chatbot response in chat message container
-        with st.chat_message("assistant"):
-            st.markdown(response)
+    
+    # Display the NEW user message
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    
+    # Display the NEW assistant response
+    with st.chat_message("assistant"):
+        st.markdown(answer.response)
