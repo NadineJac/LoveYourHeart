@@ -233,8 +233,8 @@ with col_left:
     if st.button("💾 Save Profile & Get Risk Estimate",
         type="primary",
         use_container_width=True,
-        disabled=not all_filled):
-
+        disabled=not all_filled): 
+        
         # Save all values to session state FIRST
         st.session_state["sex_value"] = sex_value
         st.session_state["age_value"] = age_value
@@ -258,40 +258,41 @@ with col_left:
         st.session_state["walk_value"] = walk_value   
         st.session_state["physhealth_value"] = physhealth_value     
 
-        
-        # Load model and make prediction
-        import pickle
-        import pandas as pd
-        PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-        MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_gradBoost.sav")#logReg.sav")
-        model = pickle.load(open(MODEL_PATH, 'rb'))
 
-        user = pd.DataFrame({             
-            'Sex': [sex_value],
-            'Age': [age_value],
-            'Race': [race_cat],
-            'SleepTime': [sleep_value],
-            'AgeCategory': [age_cat],
-            'Smoking': [smoker_value], 
-            'AlcoholDrinking': [alc_cat],
-            'BMI': [bmi_value],
-            'Diabetic': [diabetes_value],                
-            'Stroke': [stroke_value],
-            'Asthma': [astma_value],
-            'KidneyDisease': [kidney_value],
-            'SkinCancer': [skin_value],
-            'PhysicalActivity':[excercise_value],
-            'MentalHealth': [mentalhealth_value],
-            'DiffWalking': [walk_value],
-            'GenHealth': [health_cat],
-            'PhysicalHealth': [physhealth_value] 
-        })
+        with st.spinner("Estimating your heart attack risk..."):
+            # Load model and make prediction
+            import pickle
+            import pandas as pd
+            PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+            MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_gradBoost.sav")#logReg.sav")
+            model = pickle.load(open(MODEL_PATH, 'rb'))
 
-        #prediction = model.predict(user)
-        prediction = model.predict_proba(user)[:, 1] #>= 0.5
-        st.session_state["risk_value"] = round(prediction[0]*100,2)  # Store as percentage
-        st.session_state["profile_submitted"] = True
-        st.session_state["just_saved"] = True  # Flag to show we just saved
+            user = pd.DataFrame({             
+                'Sex': [sex_value],
+                'Age': [age_value],
+                'Race': [race_cat],
+                'SleepTime': [sleep_value],
+                'AgeCategory': [age_cat],
+                'Smoking': [smoker_value], 
+                'AlcoholDrinking': [alc_cat],
+                'BMI': [bmi_value],
+                'Diabetic': [diabetes_value],                
+                'Stroke': [stroke_value],
+                'Asthma': [astma_value],
+                'KidneyDisease': [kidney_value],
+                'SkinCancer': [skin_value],
+                'PhysicalActivity':[excercise_value],
+                'MentalHealth': [mentalhealth_value],
+                'DiffWalking': [walk_value],
+                'GenHealth': [health_cat],
+                'PhysicalHealth': [physhealth_value] 
+            })
+
+            #prediction = model.predict(user)
+            prediction = model.predict_proba(user)[:, 1] #>= 0.5
+            st.session_state["risk_value"] = round(prediction[0]*100,2)  # Store as percentage
+            st.session_state["profile_submitted"] = True
+            st.session_state["just_saved"] = True  # Flag to show we just saved
         
         st.session_state.scroll_to_top = True
         st.rerun()
