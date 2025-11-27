@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_scroll_to_top import scroll_to_here
 import os
+import plotly.graph_objects as go
 
 from streamlit_scroll_to_top import scroll_to_here
 
@@ -310,7 +311,59 @@ with col_left:
             elif st.session_state["risk_value"] >= 10:
                 st.warning("⚠️ Moderate Risk. Consider lifestyle changes and regular check-ups.") 
             else:
-                st.info("✅ Low Risk. Maintain a healthy lifestyle to keep your risk low.")  
+                st.info("✅ Low Risk. Maintain a healthy lifestyle to keep your risk low.") 
+
+            # Gauge chart
+            risk_percent = st.session_state["risk_value"]
+    
+            fig = go.Figure(go.Indicator(
+                mode="gauge+number",
+                value=risk_percent,
+                
+                number={
+                    "suffix": "%",
+                    "font": {"size": 48, "family": "Roboto", "color": "#C2185B"}
+                },
+    
+                title={
+                    "text": "<b>Heart Risk Level</b>",
+                    "font": {"size": 26, "family": "Arial", "color": "#880E4F"}
+                },
+    
+                gauge={
+                    "axis": {"range": [0, 100], "tickwidth": 1, "tickcolor": "#C2185B"},
+                    "borderwidth": 0,
+    
+                    # Main needle color
+                    "bar": {"color": "#C2185B", "thickness": 0.28},
+    
+                    # Gradient zones
+                    "steps": [
+                        {"range": [0, 20], "color": "#FCE4EC"},
+                        {"range": [20, 40], "color": "#F8BBD0"},
+                        {"range": [40, 60], "color": "#F06292"},
+                        {"range": [60, 80], "color": "#E91E63"},
+                        {"range": [80, 100], "color": "#C2185B"},
+                    ],
+    
+                    # Threshold marker (dark pink)
+                    "threshold": {
+                        "line": {"color": "#880E4F", "width": 6},
+                        "thickness": 0.9,
+                        "value": risk_percent
+                    }
+                }
+            ))
+    
+            fig.update_layout(
+                paper_bgcolor="white",
+                height=450,
+                margin=dict(l=40, r=40, b=40, t=80)
+            )
+    
+            # Show gauge in Streamlit
+            st.plotly_chart(fig, use_container_width=True)
+            # End Gauge chart
                           
             if st.button("Go to AI Assistant →", key="cta4"):
                 st.switch_page("pages/AIAssistance.py")
