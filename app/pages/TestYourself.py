@@ -534,7 +534,8 @@ with col_left:
                     st.info("No moderately modifiable factors currently increasing risk.")
 
 
-            st.pyplot(fig, transparent=True, width='stretch')
+            with st.spinner("Visualizing all important factors..."):
+                st.pyplot(fig, transparent=True, width='stretch')
             # end importance plot
                           
             if st.button("Go to AI Assistant →", key="cta4"):
