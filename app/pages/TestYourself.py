@@ -26,23 +26,32 @@ def scroll():
 def scrollheader():
     st.session_state.scroll_to_header = True
 
-def bootstrap_confidence_interval(pred_fn, X, n_bootstrap=1000, ci=0.95):
+def bootstrap_confidence_interval_single_row(model, user_df, n_bootstrap=200):
     """
-    pred_fn : function that returns prediction probability for a dataset
-    X       : input features for the prediction
+    Generate confidence intervals for a single user's prediction 
+    by adding small noise to numeric features.
     """
+    numeric_cols = user_df.select_dtypes(include=['float64', 'int64']).columns
+
     preds = []
-    n = len(X)
 
     for _ in range(n_bootstrap):
-        sample_idx = np.random.choice(np.arange(n), size=n, replace=True)
-        X_sample = X.iloc[sample_idx]
-        pred_prob = pred_fn(X_sample)
-        preds.append(pred_prob)
+        noisy_sample = user_df.copy()
 
-    lower = np.percentile(preds, (1 - ci) / 2 * 100)
-    upper = np.percentile(preds, (1 + ci) / 2 * 100)
-    return lower * 100, upper * 100
+        # add small gaussian noise (1–3%)
+        for col in numeric_cols:
+            val = user_df[col].iloc[0]
+            noise = np.random.normal(0, val * 0.02)  # 2% noise
+            noisy_sample[col] = max(val + noise, 0)
+
+        pred = model.predict_proba(noisy_sample)[0, 1] * 100
+        preds.append(pred)
+
+    lower = np.percentile(preds, 2.5)
+    upper = np.percentile(preds, 97.5)
+
+    return lower, upper
+
 
 # Page config
 st.set_page_config(page_title="Test Yourself", page_icon="❤️", layout="wide")
@@ -333,8 +342,8 @@ with col_left:
             
             # Confidence Interval(CI)
             X_user = st.session_state["user_data"]
-            lower_ci, upper_ci = bootstrap_confidence_interval(
-                lambda df: model.predict_proba(df)[0, 1] * 100,
+            lower_ci, upper_ci = bootstrap_confidence_interval_single_row(
+                model,
                 X_user
             )
             # Display the confidence interval
