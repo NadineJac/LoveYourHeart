@@ -458,7 +458,7 @@ with col_left:
                 importance_df['color'] = importance_df.apply(get_color, axis=1)
 
                 # Create the plot
-                fig, ax = plt.subplots(figsize=(8, 5))
+                fig, ax = plt.subplots(figsize=(7, 4))
 
                 bars = ax.barh(importance_df['feature'], importance_df['shap_value'], 
                             color=importance_df['color'], alpha=0.9)
@@ -471,26 +471,28 @@ with col_left:
                                                        
                     ax.text(label_x, bar.get_y() + bar.get_height()/2, 
                             f'{value:.2f}', 
-                            va='center', ha=alignment, fontsize=9, fontweight='bold')
+                            va='center', ha=alignment, fontsize=8)
 
                 # Add vertical line at zero
-                ax.axvline(x=0, color='black', linestyle='-', linewidth=1.5)
+                ax.axvline(x=0, color='black', linestyle='-', linewidth=1)
 
                 # Labels and title
-                ax.set_xlabel('SHAP Value (Impact on Risk)', fontsize=13, fontweight='bold')
-                ax.set_title('Feature Impact on Risk Probability', fontsize=16, fontweight='bold', pad=20)
+                ax.set_xlabel('SHAP Value (Impact on Risk)', fontsize=8)
+                ax.set_title('Feature Impact on Risk Probability', fontsize=9, pad=20)
+                ax.tick_params(axis="y", labelsize=8)
+                ax.tick_params(axis="y", labelsize=8)
 
                 # Add legend
                 from matplotlib.patches import Patch
                 legend_elements = [
-                    Patch(facecolor='#f43f5e', label='Risk ⬆️ ↑(Highly Modifiable)', alpha=0.9),
-                    Patch(facecolor='#fb7185', label='Increases Risk (Moderately Modifiable)', alpha=0.9),
-                    Patch(facecolor='#fda4af', label='Increases Risk (Non-modifiable)', alpha=0.9),
-                    Patch(facecolor='#15803d', label='Decreases Risk (Highly Modifiable)', alpha=0.9),
-                    Patch(facecolor='#16a34a', label='Decreases Risk (Moderately Modifiable)', alpha=0.9),
-                    Patch(facecolor='#86efac', label='Decreases Risk (Non-modifiable)', alpha=0.9),
+                    Patch(facecolor="#d33650", label='Risk ↑(Highly Modifiable)', alpha=0.9),
+                    Patch(facecolor='#fb7185', label='Risk ↑ (Moderately Modifiable)', alpha=0.9),
+                    Patch(facecolor='#fda4af', label='Risk ↑ (Non-modifiable)', alpha=0.9),
+                    Patch(facecolor='#15803d', label='Risk ↑(Highly Modifiable)', alpha=0.9),
+                    Patch(facecolor='#16a34a', label='Risk ↑ (Moderately Modifiable)', alpha=0.9),
+                    Patch(facecolor='#86efac', label='Risk ↑ (Non-modifiable)', alpha=0.9),
                 ]
-                ax.legend(handles=legend_elements, loc='lower left', fontsize=9, framealpha=0.95)
+                ax.legend(handles=legend_elements, loc='best', fontsize=8, framealpha=0)
 
                 # Grid
                 ax.grid(axis='x', alpha=0.3, linestyle='--')
@@ -532,7 +534,7 @@ with col_left:
                     st.info("No moderately modifiable factors currently increasing risk.")
 
 
-            st.pyplot(fig, use_container_width=True)
+            st.pyplot(fig, transparent=True, width='stretch')
             # end importance plot
                           
             if st.button("Go to AI Assistant →", key="cta4"):
