@@ -291,7 +291,7 @@ with col_left:
         st.session_state["walk_value"] = walk_value   
         st.session_state["physhealth_value"] = physhealth_value     
 
-
+        
         with st.spinner("Estimating your heart attack risk..."):
             # Load model and make prediction
 
@@ -333,11 +333,9 @@ with col_left:
         
         # Display results in col_right
     if st.session_state["profile_submitted"]:
+        with col_left:
+            st.success("✅ Profile saved!")
         with col_right:
-            st.success("✅ Profile saved! Head to the AI Assistant page to get personalized advice.")
-            st.warning('''⚠️ No proper risk estimation implemented yet. 
-                    Proceed with caution and confer with the AI Assistant to 
-                    get personalized adviced based on research literature.''')
             st.write("#### Your current heart attack risk factor:", str(st.session_state["risk_value"]),"%")
             
             # Confidence Interval(CI)
@@ -351,13 +349,6 @@ with col_left:
             st.write(f" **95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%")
             # END CI
             
-            if st.session_state["risk_value"] >= 25:
-                st.error("🚨 High Risk! Please consult a healthcare professional for a comprehensive evaluation.")
-            elif st.session_state["risk_value"] >= 10:
-                st.warning("⚠️ Moderate Risk. Consider lifestyle changes and regular check-ups.") 
-            else:
-                st.info("✅ Low Risk. Maintain a healthy lifestyle to keep your risk low.") 
-
             # Gauge chart
             risk_percent = st.session_state["risk_value"]
     
@@ -419,6 +410,15 @@ with col_left:
             # Show gauge in Streamlit
             st.plotly_chart(fig, use_container_width=True)
             # End Gauge chart
+
+
+            # Risk interpretation
+            if st.session_state["risk_value"] >= 25:
+                st.error("🚨 High Risk! Please consult a healthcare professional for a comprehensive evaluation.")
+            elif st.session_state["risk_value"] >= 10:
+                st.warning("⚠️ Moderate Risk. Consider lifestyle changes and regular check-ups.") 
+            else:
+                st.info("✅ Low Risk. Maintain a healthy lifestyle to keep your risk low.") 
 
             ### start feature importance chart
             # Get SHAP values for your user
@@ -585,6 +585,7 @@ with col_left:
             with st.spinner("Visualizing all important factors..."):
                 st.pyplot(fig, transparent=True, width='stretch')
             # end importance plot
-                          
+
+            st.write("Head to the AI Assistant for personalized advice based on your profile.")              
             if st.button("Go to AI Assistant →", key="cta4"):
                 st.switch_page("pages/AIAssistance.py")
