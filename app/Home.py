@@ -29,7 +29,7 @@ st.markdown("""
         display: inline-block;
         width: 40px;
         height: 40px;
-        background: #ff4b4b;
+        background: #f43f5e;
         color: white;
         border-radius: 50%;
         text-align: center;
@@ -44,14 +44,22 @@ st.markdown("""
         padding: 1.5rem;
         background: #f8f9fa;
         border-radius: 8px;
-        border-left: 4px solid #ff4b4b;
+        border-left: 4px solid #f43f5e;
         margin-bottom: 1rem;
+    }
+    .metrics-box {
+        padding: 1.5rem;
+        background: #f8f9fa;;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #f43f5e;
+        border-right: 4px solid #f43f5e;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # Hero section - asymmetric layout
-col_left, col_right = st.columns([3, 2], gap="large")
+col_left, col_middle, col_right = st.columns([3, 3, 4], gap="large")
 
 with col_left:
     st.markdown('<h1 class="big-title">❤️ Love Your Heart</h1>', unsafe_allow_html=True)
@@ -60,40 +68,34 @@ with col_left:
         unsafe_allow_html=True
     )
     st.write("")
-    # Horizontal layout
-    col1, col2, col3 = st.columns(3, gap="medium")
-
-    col1.metric(
-        label="Global Impact",
-        value="10,000",
-        delta="deaths/day (WHO Europe)",
-        delta_color="off",
-        border=True
-    )
-
-    col2.metric(
-        label="US Heart Attack Rate",
-        value="Every 40 sec",
-        delta="1 Heart Attack in the USA",
-                delta_color="off",
-        border=True
-    )
-
-    col3.metric(
-        label="Preventable",
-        value="Up to 90%",
-        delta="of heart disease can be prevented",
-        delta_color="off",
-        border=True
-    )
-
+with col_middle:
+    st.markdown('''
+    <div class="metrics-box">
+        <strong>🌍 Global Impact: 10,000</strong><br>
+        deaths/day (WHO Europe)
+    </div>
+    ''', unsafe_allow_html=True)
+        
+    st.markdown('''
+    <div class="metrics-box">
+        <strong>✅ Preventable: Up to 90%</strong><br>
+        of heart disease can be prevented
+    </div>
+    ''', unsafe_allow_html=True)
 
 with col_right:
-    st.markdown("#### Understand Your Risk")
-    st.write("Quick cardiovascular risk assessment based on your lifestyle and health metrics.")
-    st.write("")
-    st.markdown("#### Evidence-Based Guidance")
-    st.write("Answers from AI trained on medical literature, personalized to your profile.")
+    st.markdown('''
+    <div class="feature-box">
+        <strong>💡 Understand Your Risk</strong><br>
+        Quick cardiovascular risk assessment based on your lifestyle and health.
+    </div>
+    ''', unsafe_allow_html=True)
+    st.markdown('''
+    <div class="feature-box">
+        <strong>📖 Evidence-Based Guidance</strong><br>
+        Answers from AI trained on medical literature, personalized to your profile.
+    </div>
+    ''', unsafe_allow_html=True)
 
 st.write("")
 st.divider()
