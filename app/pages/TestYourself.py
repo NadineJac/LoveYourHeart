@@ -26,6 +26,24 @@ def scroll():
 def scrollheader():
     st.session_state.scroll_to_header = True
 
+def bootstrap_confidence_interval(pred_fn, X, n_bootstrap=1000, ci=0.95):
+    """
+    pred_fn : function that returns prediction probability for a dataset
+    X       : input features for the prediction
+    """
+    preds = []
+    n = len(X)
+
+    for _ in range(n_bootstrap):
+        sample_idx = np.random.choice(np.arange(n), size=n, replace=True)
+        X_sample = X.iloc[sample_idx]
+        pred_prob = pred_fn(X_sample)
+        preds.append(pred_prob)
+
+    lower = np.percentile(preds, (1 - ci) / 2 * 100)
+    upper = np.percentile(preds, (1 + ci) / 2 * 100)
+    return lower * 100, upper * 100
+
 # Page config
 st.set_page_config(page_title="Test Yourself", page_icon="❤️", layout="wide")
 st.title(" ❤️ Get your cardiovascular risk profile")
@@ -312,6 +330,16 @@ with col_left:
                     Proceed with caution and confer with the AI Assistant to 
                     get personalized adviced based on research literature.''')
             st.write("#### Your current heart attack risk factor:", str(st.session_state["risk_value"]),"%")
+            
+            # Confidence Interval(CI)
+            lower_ci, upper_ci = bootstrap_confidence_interval(
+            lambda data: model.predict_proba(data)[0][1],
+            X_user
+            )
+            # Display the confidence interval
+            st.write(f" **95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%")
+            # END CI
+            
             if st.session_state["risk_value"] >= 25:
                 st.error("🚨 High Risk! Please consult a healthcare professional for a comprehensive evaluation.")
             elif st.session_state["risk_value"] >= 10:
