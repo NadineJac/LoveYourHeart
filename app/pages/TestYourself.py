@@ -478,7 +478,7 @@ with col_left:
 
                 # Labels and title
                 ax.set_xlabel('SHAP Value (Impact on Risk)', fontsize=8)
-                ax.set_title('Feature Impact on Risk Probability', fontsize=9, pad=20)
+                #ax.set_title('Feature Impact on Risk Probability', fontsize=9, pad=20)
                 ax.tick_params(axis="y", labelsize=8)
                 ax.tick_params(axis="y", labelsize=8)
 
