@@ -341,7 +341,7 @@ with col_left:
                     "borderwidth": 0,
     
                     # Main needle color
-                    "bar": {"color": "#C2185B", "thickness": 0.35},
+                    "bar": {"color": "#C2185B", "thickness": 0.40},
     
                     # Gradient zones
                     "steps": [
@@ -369,16 +369,10 @@ with col_left:
                 textfont=dict(size=42, color="crimson"),
                 showlegend=False
             ))
-
-            # Hide axes completely
-            fig.update_xaxes(visible=False)
-            fig.update_yaxes(visible=False)
     
             fig.update_layout(
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
-                xaxis=dict(showgrid=False, zeroline=False),
-                yaxis=dict(showgrid=False, zeroline=False)
                 height=450,
                 margin=dict(l=40, r=40, b=40, t=80)
             )
