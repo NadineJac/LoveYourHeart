@@ -586,6 +586,13 @@ with col_left:
                 st.pyplot(fig, transparent=True, width='stretch')
             # end importance plot
 
+            with st.expander("SHAP Values Explained"):
+                st.write("""
+SHAP values show how much each health factor (age, smoking, etc.) pushed the prediction higher or lower from the average baseline risk. Positive values increase heart disease risk, while negative values decrease it. All values add up to give the final prediction, explaining exactly why the model arrived at that specific percentage.
+
+                         [→ Learn more about SHAP](https://shap.readthedocs.io/en/latest/index.html)
+                         """)
+
             st.write("Head to the AI Assistant for personalized advice based on your profile.")              
             if st.button("Go to AI Assistant →", key="cta4"):
                 st.switch_page("pages/AIAssistance.py")
