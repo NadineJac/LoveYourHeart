@@ -32,7 +32,76 @@ Approximately 805,000 Americans experience a heart attack each year[[3]](https:/
 In the European Union, there were 1.68 million deaths from diseases of the circulatory system in 2022, with ischemic heart diseases (which include heart attacks) being a leading cause. In Germany, the 12-month prevalence of coronary heart disease is 6.0% among men and 3.7% among women [[4]](https://pmc.ncbi.nlm.nih.gov/articles/PMC10161269/). The prevalence increases dramatically with age, affecting up to 24.1% of men and 16.0% of women aged 75 years and older.
 
 While these statistics paint a serious picture, age-standardized mortality rates for acute myocardial infarction in Germany have fallen by an average of 4.2% per year for women and 4.1% per year for men between 1998 and 2023 [[5]](https://pmc.ncbi.nlm.nih.gov/articles/PMC12175194/), demonstrating that prevention and improved treatment are making a real difference.
+""")
+    with st.spinner ("Plot data..."):
+        import matplotlib.pyplot as plt
+        import pandas as pd
+        plot_data = pd.DataFrame({
+            "Region": [
+                "United States",
+                "European Union"
+            ],
+            "value": [919_032, 1_680_000],  # numeric only
+            "display": [
+                "919,032 deaths (2023)",
+                "1.68 million deaths (2022)"
+            ],
+            "info": [
+                "Leading cause of death for over 100 years",
+                "42.5% of all deaths annually in WHO European Region"
+            ]
+        })
+        
 
+        fig, ax = plt.subplots(figsize=(10, 2))
+
+        # Reverse order so first item is on top
+        plot_data = plot_data.iloc[::-1]
+
+        bars = ax.barh(
+            plot_data["Region"],
+            plot_data["value"],
+            color="#f43f5e",
+            alpha=0.85
+        )
+
+        # Main value labels (on bars)
+        for bar, value_label in zip(bars, plot_data["display"]):
+            ax.text(
+                0.1e5,
+                bar.get_y() + bar.get_height() / 2,
+                f"   {value_label}",
+                va="center",
+                ha="left",
+                fontsize=10,
+                color="#FFFFFF",
+                fontweight="bold"
+            )
+
+    # Additional info BELOW each bar
+    for bar, info in zip(bars, plot_data["info"]):
+        ax.text(
+            bar.get_width(),
+            bar.get_y() + bar.get_height() / 2,
+            f"   {info}",
+            va="center",
+            ha="left",
+            fontsize=10,            
+        )
+    ax.set_xlabel("Absolute Number of Deaths")
+    ax.set_ylabel("")
+
+    # Remove spines
+    for spine in ["top", "right", "left"]:
+        ax.spines[spine].set_visible(False)
+
+    ax.grid(axis="x", linestyle="--", alpha=0.3)
+    ax.set_axisbelow(True)
+
+    plt.tight_layout()
+    st.pyplot(fig, transparent=True, use_container_width=True)
+
+    st.markdown("""
 
 ## The Power of Prevention: Modifiable Risk Factors
 
@@ -68,3 +137,51 @@ Understanding your risk is the first step toward prevention. The good news is th
 
 Your heart health is in your hands—and with the right knowledge and actions, you can significantly reduce your risk of heart attack and enjoy a longer, healthier life.
             """)
+
+
+    # Data Sources section
+    st.markdown("#### Data Sources")
+
+    sources = """
+    - **US Statistics**: [CDC Heart Disease Facts and Statistics](https://www.cdc.gov/heart-disease/data-research/facts-stats/index.html) 
+    - **WHO European Region**: [WHO Europe News](https://www.who.int/europe/news-room/15-05-2024-cardiovascular-diseases-kill-10-000-people-in-the-who-european-region-every-day--with-men-dying-more-frequently-than-women)
+    - **European Union Statistics**: [Eurostat - Cardiovascular Diseases Statistics](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Cardiovascular_diseases_statistics)
+    - **Germany CHD Prevalence**: [DEGS1 Study (PMC10161269)](https://pmc.ncbi.nlm.nih.gov/articles/PMC10161269/)
+    - **Germany Mortality Trends**: [German Cardiovascular Disease Trends (PMC12175194)](https://pmc.ncbi.nlm.nih.gov/articles/PMC12175194/)
+    """
+
+    st.markdown(sources)
+
+with col_right:
+    st.metric(
+        label="Global Impact",
+        value="10,000",
+        delta="deaths/day (WHO Europe)",
+        delta_color="off",
+        border=True
+    )
+    st.metric(
+        label="12-month prevalence",
+        value="6.0% men, 3.7% women",
+        delta="of coronary heart disease in Germany",
+                delta_color="off",
+        border=True
+    )
+
+    # st.metric(
+    #     label="US Heart Attack Rate",
+    #     value="Every 40 sec",
+    #     delta="1 Heart Attack in the USA",
+    #             delta_color="off",
+    #     border=True
+    # )
+
+    st.metric(
+        label="Preventable",
+        value="Up to 90%",
+        delta="of heart disease can be prevented",
+        delta_color="off",
+        border=True
+    )
+
+
