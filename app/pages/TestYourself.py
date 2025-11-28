@@ -41,21 +41,7 @@ def bootstrap_confidence_interval_single_row(model, user_df, n_bootstrap=300):
         # add small gaussian noise (1–3%)
         for col in numeric_cols:
             val = user_df[col].iloc[0]
-            # noise = np.random.normal(0, val * 0.20)  # 20% noise
-            
-            # --- Meaningful noise ranges based on typical human variation ---
-            if col == "Age":
-                noise = np.random.normal(0, 1.0)          # ±1 year
-            elif col == "SleepTime":
-                noise = np.random.normal(0, 1.0)          # ±1 hour
-            elif col in ["PhysicalHealth", "MentalHealth"]:
-                noise = np.random.normal(0, 3.0)          # ±3 days
-            elif col == "BMI":
-                noise = np.random.normal(0, 1.5)          # ±1.5 BMI units
-            else:
-                # Fallback: 10% noise
-                noise = np.random.normal(0, max(val * 0.1, 1))
-                
+            noise = np.random.normal(0, val * 0.50)  # 50% noise                
             noisy_sample[col] = max(val + noise, 0)
 
         pred = model.predict_proba(noisy_sample)[0, 1] * 100
