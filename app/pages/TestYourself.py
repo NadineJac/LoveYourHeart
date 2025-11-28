@@ -341,7 +341,7 @@ with col_left:
                     "borderwidth": 0,
     
                     # Main needle color
-                    "bar": {"color": "#C2185B", "thickness": 0.28},
+                    "bar": {"color": "#C2185B", "thickness": 0.35},
     
                     # Gradient zones
                     "steps": [
@@ -359,6 +359,15 @@ with col_left:
                         "value": risk_percent
                     }
                 }
+            ))
+
+            fig.add_trace(go.Scatter(
+                x=[0],  
+                y=[0.55],  
+                text=["❤️"],
+                mode="text",
+                textfont=dict(size=42, color="crimson"),
+                showlegend=False
             ))
     
             fig.update_layout(
