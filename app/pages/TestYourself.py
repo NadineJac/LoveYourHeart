@@ -26,7 +26,7 @@ def scroll():
 def scrollheader():
     st.session_state.scroll_to_header = True
 
-def bootstrap_confidence_interval_single_row(model, user_df, n_bootstrap=200):
+def bootstrap_confidence_interval_single_row(model, user_df, n_bootstrap=300):
     """
     Generate confidence intervals for a single user's prediction 
     by adding small noise to numeric features.
@@ -41,7 +41,7 @@ def bootstrap_confidence_interval_single_row(model, user_df, n_bootstrap=200):
         # add small gaussian noise (1–3%)
         for col in numeric_cols:
             val = user_df[col].iloc[0]
-            noise = np.random.normal(0, val * 0.02)  # 2% noise
+            noise = np.random.normal(0, val * 0.20)  # 20% noise
             noisy_sample[col] = max(val + noise, 0)
 
         pred = model.predict_proba(noisy_sample)[0, 1] * 100
