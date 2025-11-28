@@ -2,8 +2,13 @@ import streamlit as st
 from streamlit_scroll_to_top import scroll_to_here
 import os
 import plotly.graph_objects as go
-
+import pickle
+import pandas as pd
+import shap
 from streamlit_scroll_to_top import scroll_to_here
+import numpy as np
+import shap
+import matplotlib.pyplot as plt
 
 if 'scroll_to_top' not in st.session_state:
     st.session_state.scroll_to_top = False
@@ -262,8 +267,7 @@ with col_left:
 
         with st.spinner("Estimating your heart attack risk..."):
             # Load model and make prediction
-            import pickle
-            import pandas as pd
+
             PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
             MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_gradBoost.sav")#logReg.sav")
             model = pickle.load(open(MODEL_PATH, 'rb'))
@@ -294,6 +298,8 @@ with col_left:
             st.session_state["risk_value"] = round(prediction[0]*100,2)  # Store as percentage
             st.session_state["profile_submitted"] = True
             st.session_state["just_saved"] = True  # Flag to show we just saved
+            st.session_state["model"] = model  # Store model for later use
+            st.session_state["user_data"] = user  # Store user data for later use
         
         st.session_state.scroll_to_top = True
         st.rerun()
@@ -365,6 +371,169 @@ with col_left:
             # Show gauge in Streamlit
             st.plotly_chart(fig, use_container_width=True)
             # End Gauge chart
+
+            ### start feature importance chart
+            # Get SHAP values for your user
+
+            def compute_shap_plot(model, user):
+                X_user_preprocessed = model.named_steps["prep"].transform(user)
+                explainer = shap.TreeExplainer(model.named_steps["model"])
+                shap_values = explainer(X_user_preprocessed)
+
+                # Get encoded feature names
+                encoded_feature_names = model.named_steps["prep"].get_feature_names_out()
+
+                # Aggregate SHAP values by original feature (keeping the sign!)
+                original_importances = {}
+
+                for i, encoded_name in enumerate(encoded_feature_names):
+                    # Extract original feature name
+                    if '__' in encoded_name:
+                        original_feature = encoded_name.split('__')[1].rsplit('_', 1)[0]
+                    else:
+                        original_feature = encoded_name.split('_')[0]
+                    
+                    # Sum SHAP values (keep the sign to show direction)
+                    shap_value = shap_values.values[0, i]
+                    
+                    if original_feature in original_importances:
+                        original_importances[original_feature] += shap_value
+                    else:
+                        original_importances[original_feature] = shap_value
+
+                # Convert to DataFrame
+                importance_df = pd.DataFrame({
+                    'feature': list(original_importances.keys()),
+                    'shap_value': list(original_importances.values())
+                })
+
+                # Define modifiability levels
+                HIGHLY_MODIFIABLE = {
+                    "Smoking",
+                    "AlcoholDrinking",
+                    "PhysicalActivity",
+                    "BMI",
+                    "SleepTime",
+                }
+
+                MODERATELY_MODIFIABLE = {
+                    "PhysicalHealth",
+                    "MentalHealth",
+                    "GenHealth",
+                    "DiffWalking",
+                }
+
+                # Classify features
+                def get_modifiability(feature):
+                    if feature in HIGHLY_MODIFIABLE:
+                        return 'highly'
+                    elif feature in MODERATELY_MODIFIABLE:
+                        return 'moderately'
+                    else:
+                        return 'non'
+
+                importance_df['modifiability'] = importance_df['feature'].apply(get_modifiability)
+
+                # Sort by absolute value
+                importance_df['abs_shap'] = importance_df['shap_value'].abs()
+                importance_df = importance_df.sort_values('abs_shap', ascending=True)
+
+                # Assign colors based on direction and modifiability
+                def get_color(row):
+                    if row['shap_value'] < 0:  # Decreases risk (green)
+                        if row['modifiability'] == 'highly':
+                            return "#0c632c"  # Dark green
+                        elif row['modifiability'] == 'moderately':
+                            return "#3E9E61"  # Medium green
+                        else:
+                            return "#7fd69f"  # Light green
+                    else:  # Increases risk (rose)
+                        if row['modifiability'] == 'highly':
+                            return '#f43f5e'  # Dark rose
+                        elif row['modifiability'] == 'moderately':
+                            return '#fb7185'  # Medium rose
+                        else:
+                            return '#fda4af'  # Light rose
+
+                importance_df['color'] = importance_df.apply(get_color, axis=1)
+
+                # Create the plot
+                fig, ax = plt.subplots(figsize=(8, 5))
+
+                bars = ax.barh(importance_df['feature'], importance_df['shap_value'], 
+                            color=importance_df['color'], alpha=0.9)
+
+                # Add value labels on bars with modifiability markers
+                for i, (bar, value, modifiability) in enumerate(zip(bars, importance_df['shap_value'], 
+                                                                    importance_df['modifiability'])):
+                    label_x = value + (0.002 if value > 0 else -0.002)
+                    alignment = 'left' if value > 0 else 'right'
+                                                       
+                    ax.text(label_x, bar.get_y() + bar.get_height()/2, 
+                            f'{value:.2f}', 
+                            va='center', ha=alignment, fontsize=9, fontweight='bold')
+
+                # Add vertical line at zero
+                ax.axvline(x=0, color='black', linestyle='-', linewidth=1.5)
+
+                # Labels and title
+                ax.set_xlabel('SHAP Value (Impact on Risk)', fontsize=13, fontweight='bold')
+                ax.set_title('Feature Impact on Risk Probability', fontsize=16, fontweight='bold', pad=20)
+
+                # Add legend
+                from matplotlib.patches import Patch
+                legend_elements = [
+                    Patch(facecolor='#f43f5e', label='Risk ⬆️ ↑(Highly Modifiable)', alpha=0.9),
+                    Patch(facecolor='#fb7185', label='Increases Risk (Moderately Modifiable)', alpha=0.9),
+                    Patch(facecolor='#fda4af', label='Increases Risk (Non-modifiable)', alpha=0.9),
+                    Patch(facecolor='#15803d', label='Decreases Risk (Highly Modifiable)', alpha=0.9),
+                    Patch(facecolor='#16a34a', label='Decreases Risk (Moderately Modifiable)', alpha=0.9),
+                    Patch(facecolor='#86efac', label='Decreases Risk (Non-modifiable)', alpha=0.9),
+                ]
+                ax.legend(handles=legend_elements, loc='lower left', fontsize=9, framealpha=0.95)
+
+                # Grid
+                ax.grid(axis='x', alpha=0.3, linestyle='--')
+                ax.set_axisbelow(True)
+                for spine in ["top", "right", "left"]:
+                    ax.spines[spine].set_visible(False)
+
+                return fig, importance_df
+            
+            model = st.session_state["model"]
+            user = st.session_state["user_data"]
+            fig, importance_df = compute_shap_plot(model, user)
+
+            col1, col12 = st.columns(2)
+            with col1:
+                st.markdown("##### ✅ Priority actions – highly modifiable factors")
+                high_risk = importance_df[
+                    (importance_df['modifiability'] == 'highly') &
+                    (importance_df['shap_value'] > 0)
+                ].sort_values('shap_value', ascending=False)
+
+                if len(high_risk):
+                    for _, row in high_risk.iterrows():
+                        st.write(f"🔴 **{row['feature']}**: +{row['shap_value']:.3f}")
+                else:
+                    st.success("No highly modifiable factors currently increasing risk.")
+            with col12:
+                st.markdown("##### ⚠️ Secondary actions – moderately modifiable factors")
+
+                moderate_risk = importance_df[
+                    (importance_df['modifiability'] == 'moderately') &
+                    (importance_df['shap_value'] > 0)
+                ].sort_values('shap_value', ascending=False)
+
+                if len(moderate_risk):
+                    for _, row in moderate_risk.iterrows():
+                        st.write(f"🟠 **{row['feature']}**: +{row['shap_value']:.3f}")
+                else:
+                    st.info("No moderately modifiable factors currently increasing risk.")
+
+
+            st.pyplot(fig, use_container_width=True)
+            # end importance plot
                           
             if st.button("Go to AI Assistant →", key="cta4"):
                 st.switch_page("pages/AIAssistance.py")
