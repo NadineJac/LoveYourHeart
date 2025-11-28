@@ -210,11 +210,11 @@ with col_left:
             #vertical=True,
             default=st.session_state.get("diabetes_value")
         )
-        # astma
-        astma_value = st.segmented_control(
-            "Did you ever have astma?", 
+        # asthma
+        asthma_value = st.segmented_control(
+            "Did you ever have asthma?", 
             ["No", "Yes"], 
-            default=st.session_state.get("astma_value")
+            default=st.session_state.get("asthma_value")
         )
         # Kidney disease
         kidney_value = st.segmented_control(
@@ -251,7 +251,7 @@ with col_left:
         "weight": weight_value,
         "alcohol": alc_value,
         "stroke": stroke_value,
-        "asthma": astma_value,
+        "asthma": asthma_value,
         "kidney": kidney_value,
         "skin_cancer": skin_value,
         "exercise": excercise_value,
@@ -283,7 +283,7 @@ with col_left:
         st.session_state["alc_value"] = alc_value
         st.session_state["alc_cat"] = alc_cat 
         st.session_state["stroke_value"] = stroke_value
-        st.session_state["astma_value"] = astma_value
+        st.session_state["asthma_value"] = asthma_value
         st.session_state["kidney_value"] = kidney_value
         st.session_state["skin_value"] = skin_value
         st.session_state["excercise_value"] = excercise_value
@@ -310,7 +310,7 @@ with col_left:
                 'BMI': [bmi_value],
                 'Diabetic': [diabetes_value],                
                 'Stroke': [stroke_value],
-                'Asthma': [astma_value],
+                'Asthma': [asthma_value],
                 'KidneyDisease': [kidney_value],
                 'SkinCancer': [skin_value],
                 'PhysicalActivity':[excercise_value],
@@ -589,7 +589,6 @@ with col_left:
             with st.expander("SHAP Values Explained"):
                 st.write("""
 SHAP values show how much each health factor (age, smoking, etc.) pushed the prediction higher or lower from the average baseline risk. Positive values increase heart disease risk, while negative values decrease it. All values add up to give the final prediction, explaining exactly why the model arrived at that specific percentage.
-
                          [→ Learn more about SHAP](https://shap.readthedocs.io/en/latest/index.html)
                          """)
 
