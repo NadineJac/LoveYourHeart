@@ -332,9 +332,10 @@ with col_left:
             st.write("#### Your current heart attack risk factor:", str(st.session_state["risk_value"]),"%")
             
             # Confidence Interval(CI)
+            # X_user = st.session_state["user_data"]
             lower_ci, upper_ci = bootstrap_confidence_interval(
             lambda data: model.predict_proba(data)[0][1],
-            X_user
+            user
             )
             # Display the confidence interval
             st.write(f" **95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%")
