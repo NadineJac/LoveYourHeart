@@ -334,8 +334,8 @@ with col_left:
             # Confidence Interval(CI)
             X_user = st.session_state["user_data"]
             lower_ci, upper_ci = bootstrap_confidence_interval(
-            lambda data: model.predict_proba(data)[0][1],
-            X_user
+                lambda df: model.predict_proba(df)[0, 1] * 100,
+                X_user
             )
             # Display the confidence interval
             st.write(f" **95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%")
