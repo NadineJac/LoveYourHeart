@@ -346,7 +346,7 @@ with col_left:
                 X_user
             )
             # Display the confidence interval
-            st.write(f" **95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%")
+            st.write(f":grey[🔎 95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%]")
             # END CI
             
             # Gauge chart
