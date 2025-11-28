@@ -341,6 +341,7 @@ with col_left:
             st.write("#### Your current heart attack risk factor:", str(st.session_state["risk_value"]),"%")
             
             # Confidence Interval(CI)
+            model = st.session_state["model"]
             X_user = st.session_state["user_data"]
             lower_ci, upper_ci = bootstrap_confidence_interval_single_row(
                 model,
