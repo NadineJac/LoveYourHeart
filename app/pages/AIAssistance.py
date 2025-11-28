@@ -52,8 +52,8 @@ if st.session_state.get("alc_cat"):
     user_profile["alcohol_consumption"] = st.session_state["alc_cat"]
 if st.session_state.get("stroke_value"):
     user_profile["stroke"] = st.session_state["stroke_value"]
-if st.session_state.get("astma_value"):
-    user_profile["asthma"] = st.session_state["astma_value"]
+if st.session_state.get("asthma_value"):
+    user_profile["asthma"] = st.session_state["asthma_value"]
 if st.session_state.get("kidney_value"):
     user_profile["kidney_disease"] = st.session_state["kidney_value"]
 if st.session_state.get("skin_value"):
@@ -172,7 +172,7 @@ PROFILE_GROUPS = {
         "mental_health_poor",
         "difficulty_walking",
         "smoking",
-        "alcohol_category",
+        "alcohol_consumption",
     ],
     "Diseases": [
         "diabetic",
