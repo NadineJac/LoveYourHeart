@@ -249,7 +249,7 @@ def compute_shap_plot(model, user, user2=None):
                 # Add label for What-If value
                 label_x = whatif_value#whatif_value + (0.02 if whatif_value > 0 else -0.02)
                 alignment = 'left' if whatif_value > 0 else 'right'
-                ax.text(label_x, y_position, f'   {whatif_value:.2f}   ', 
+                ax.text(label_x, y_position, f' {whatif_value:.2f}  ', 
                        va='center', ha=alignment, fontsize=8, 
                        color='#0055A4')
 
