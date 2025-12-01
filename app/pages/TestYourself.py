@@ -100,11 +100,18 @@ def display_changes_compact(user, user2):
                         else:
                             st.info("No changes detected.")
 
-def compute_shap_plot(model, user):
+def compute_shap_plot(model, user, user2=None):
+    """
+    Compute SHAP plot with optional What-If comparison.
+    
+    Parameters:
+    - model: Trained pipeline model
+    - user: Original user DataFrame
+    - user2: Modified user DataFrame (optional, for What-If scenario)
+    """
     X_user_preprocessed = model.named_steps["prep"].transform(user)
     explainer = shap.TreeExplainer(model.named_steps["model"])
     shap_values = explainer(X_user_preprocessed)
-
 
     # Get encoded feature names
     encoded_feature_names = model.named_steps["prep"].get_feature_names_out()
@@ -132,6 +139,34 @@ def compute_shap_plot(model, user):
         'feature': list(original_importances.keys()),
         'shap_value': list(original_importances.values())
     })
+
+    # If user2 is provided, compute SHAP values for modified data
+    whatif_importances = None
+    changed_features = []
+    if user2 is not None:
+        # Find which features changed
+        for col in user.columns:
+            if user[col].iloc[0] != user2[col].iloc[0]:
+                changed_features.append(col)
+        
+        # Compute SHAP values for user2
+        X_user2_preprocessed = model.named_steps["prep"].transform(user2)
+        shap_values2 = explainer(X_user2_preprocessed)
+        
+        # Aggregate SHAP values for user2
+        whatif_importances = {}
+        for i, encoded_name in enumerate(encoded_feature_names):
+            if '__' in encoded_name:
+                original_feature = encoded_name.split('__')[1].rsplit('_', 1)[0]
+            else:
+                original_feature = encoded_name.split('_')[0]
+            
+            shap_value = shap_values2.values[0, i]
+            
+            if original_feature in whatif_importances:
+                whatif_importances[original_feature] += shap_value
+            else:
+                whatif_importances[original_feature] = shap_value
 
     # Define modifiability levels
     HIGHLY_MODIFIABLE = {
@@ -199,25 +234,55 @@ def compute_shap_plot(model, user):
                 f'{value:.2f}', 
                 va='center', ha=alignment, fontsize=8)
 
+    # Plot What-If scenario as blue dots if available
+    if whatif_importances is not None and changed_features:
+        # Add What-If values as blue dots for changed features
+        for idx, row in importance_df.iterrows():
+            feature = row['feature']
+            if feature in changed_features and feature in whatif_importances:
+                whatif_value = whatif_importances[feature]
+                # Use the enumerated position in the sorted dataframe
+                y_position = list(importance_df['feature']).index(feature)
+                
+                # Plot blue dot
+                ax.plot(whatif_value, y_position, 'o', color='#3b82f6', 
+                       markersize=8, zorder=5, markeredgecolor='white', markeredgewidth=1)
+                
+                # Add label for What-If value
+                label_x = whatif_value + (0.002 if whatif_value > 0 else -0.002)
+                alignment = 'left' if whatif_value > 0 else 'right'
+                ax.text(label_x, y_position, f'{whatif_value:.2f}', 
+                       va='center', ha=alignment, fontsize=8, 
+                       color='#3b82f6', fontweight='bold')
+
     # Add vertical line at zero
     ax.axvline(x=0, color='black', linestyle='-', linewidth=1)
 
     # Labels and title
     ax.set_xlabel('SHAP Value (Impact on Risk)', fontsize=8)
-    #ax.set_title('Feature Impact on Risk Probability', fontsize=9, pad=20)
     ax.tick_params(axis="y", labelsize=8)
-    ax.tick_params(axis="y", labelsize=8)
+    ax.tick_params(axis="x", labelsize=8)
 
     # Add legend
     from matplotlib.patches import Patch
+    from matplotlib.lines import Line2D
+    
     legend_elements = [
-        Patch(facecolor="#d33650", label='Risk ↑(Highly Modifiable)', alpha=0.9),
+        Patch(facecolor="#d33650", label='Risk ↑ (Highly Modifiable)', alpha=0.9),
         Patch(facecolor='#fb7185', label='Risk ↑ (Moderately Modifiable)', alpha=0.9),
         Patch(facecolor='#fda4af', label='Risk ↑ (Non-modifiable)', alpha=0.9),
-        Patch(facecolor='#15803d', label='Risk ↑(Highly Modifiable)', alpha=0.9),
-        Patch(facecolor='#16a34a', label='Risk ↑ (Moderately Modifiable)', alpha=0.9),
-        Patch(facecolor='#86efac', label='Risk ↑ (Non-modifiable)', alpha=0.9),
+        Patch(facecolor='#15803d', label='Risk ↓ (Highly Modifiable)', alpha=0.9),
+        Patch(facecolor='#16a34a', label='Risk ↓ (Moderately Modifiable)', alpha=0.9),
+        Patch(facecolor='#86efac', label='Risk ↓ (Non-modifiable)', alpha=0.9),
     ]
+    
+    # Add What-If legend item if applicable
+    if whatif_importances is not None and changed_features:
+        legend_elements.append(
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='#3b82f6', 
+                   markersize=8, label='What-If Scenario', markeredgecolor='white')
+        )
+    
     ax.legend(handles=legend_elements, loc='best', fontsize=8, framealpha=0)
 
     # Grid
@@ -714,41 +779,66 @@ with col_left:
                     # Display the confidence interval
                     st.write(f":grey[🔎 **95% Confidence Interval:** {lower_ci2:.1f}% – {upper_ci2:.1f}%]")
                     # END CI
+            # Gauge plot
             
-            # Gauge chart
+            # Get risk value and compute confidence interval
             risk_percent = st.session_state["risk_value"]
-    
+            model = st.session_state["model"]
+            X_user = st.session_state["user_data"]
+
+            lower_ci, upper_ci = bootstrap_confidence_interval_single_row(
+                model,
+                X_user
+            )
+
+            # Optional: Get What-If risk if available
+            whatif_risk = st.session_state.get("risk_value2", None)
+
+            # Create gauge chart
             fig = go.Figure(go.Indicator(
                 mode="gauge+number",
                 value=risk_percent,
                 
                 number={
                     "suffix": "%",
-                    "font": {"size": 48, "family": "Roboto", "color": "#C2185B"}
+                    "font": {"size": 48, "family": "Arial, sans-serif", "color": "#C2185B"}
                 },
-    
+
                 title={
                     "text": "<b>Heart Risk Level</b>",
-                    "font": {"size": 26, "family": "Arial", "color": "#880E4F"}
+                    "font": {"size": 26, "family": "Arial, sans-serif", "color": "#880E4F"}
                 },
-    
+
                 gauge={
-                    "axis": {"range": [0, 100], "tickwidth": 1, "tickcolor": "#C2185B"},
+                    "axis": {
+                        "range": [0, 100], 
+                        "tickwidth": 1, 
+                        "tickcolor": "#C2185B",
+                        "showticklabels": True
+                    },
                     "borderwidth": 0,
-    
+
                     # Main needle color
                     "bar": {"color": "#C2185B", "thickness": 0.40},
-    
-                    # Gradient zones
+
+                    # Gradient zones with CI and What-If as steps
                     "steps": [
                         {"range": [0, 20], "color": "#FCE4EC"},
                         {"range": [20, 40], "color": "#F8BBD0"},
                         {"range": [40, 60], "color": "#F06292"},
                         {"range": [60, 80], "color": "#E91E63"},
                         {"range": [80, 100], "color": "#C2185B"},
-                    ],
-    
-                    # Threshold marker (dark pink)
+                        {"range": [lower_ci, upper_ci], "color": "#bcc4c5"},
+                    ] + (
+                        # Add CI and What-If steps if What-If risk is available
+                        [
+                            {"range": [lower_ci2, whatif_risk - 0.25,], "color": "#d1ecf1"},  # Light blue
+                            {"range": [whatif_risk -0.25, whatif_risk + 0.25], "color": "#3b82f6"},  # Blue dot as thin step
+                            {"range": [whatif_risk + 0.25, upper_ci2], "color": "#d1ecf1"},  # Light blue
+                        ] if (whatif_risk is not None and whatif_risk is not False) else []
+                    ),
+
+                    # Threshold marker (dark pink) - main point estimate
                     "threshold": {
                         "line": {"color": "#880E4F", "width": 6},
                         "thickness": 0.9,
@@ -757,26 +847,30 @@ with col_left:
                 }
             ))
 
-            fig.add_trace(go.Scatter(
-                x=[0],  
-                y=[0.55],  
-                text=["❤️"],
-                mode="text",
-                textfont=dict(size=42, color="crimson"),
-                showlegend=False
-            ))
-    
+            # Add heart emoji - positioned in gauge coordinate system
+            fig.add_annotation(
+                x=0.5,
+                y=0.25,
+                text="❤️",
+                font=dict(size=42, color="crimson"),
+                showarrow=False,
+                xref="paper",
+                yref="paper"
+            )            
+
             fig.update_layout(
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
                 height=450,
-                margin=dict(l=40, r=40, b=40, t=80)
+                margin=dict(l=40, r=40, b=40, t=80),
+                # Remove gridlines
+                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
             )
-    
+
             # Show gauge in Streamlit
             st.plotly_chart(fig, use_container_width=True)
             # End Gauge chart
-
 
             ## Risk interpretation
             if st.session_state["risk_value"] >= 25:
@@ -790,7 +884,13 @@ with col_left:
             # Get SHAP values for your user        
             model = st.session_state["model"]
             user = st.session_state["user_data"]
-            fig, importance_df = compute_shap_plot(model, user)
+            if st.session_state["risk_value2"] is not False:
+                user2 = st.session_state["user_data2"] 
+                with st.spinner('Updating importances...'):
+                    fig, importance_df = compute_shap_plot(model, user, user2) 
+            else:
+                with st.spinner('Plotting importances...'):
+                    fig, importance_df = compute_shap_plot(model, user)
 
             col1, col12 = st.columns(2)
             with col1:
