@@ -1,3 +1,4 @@
+### Load libraries
 import streamlit as st
 from streamlit_scroll_to_top import scroll_to_here
 import os
@@ -9,7 +10,10 @@ from streamlit_scroll_to_top import scroll_to_here
 import numpy as np
 import shap
 import matplotlib.pyplot as plt
+#----------------------------------------------------------------------------
+### Define functions
 
+## Scrolling
 if 'scroll_to_top' not in st.session_state:
     st.session_state.scroll_to_top = False
     
@@ -26,6 +30,7 @@ def scroll():
 def scrollheader():
     st.session_state.scroll_to_header = True
 
+## Assign age categories
 def assign_age_cat(age_value):
     if age_value >= 18 and age_value <= 24:
         age_cat = "18-24"
@@ -55,6 +60,7 @@ def assign_age_cat(age_value):
         age_cat = "80 or older"
     return age_cat
 
+## Bootstrap confidence intervals
 def bootstrap_confidence_interval_single_row(model, user_df, n_bootstrap=300):
     """
     Generate confidence intervals for a single user's prediction 
@@ -80,24 +86,20 @@ def bootstrap_confidence_interval_single_row(model, user_df, n_bootstrap=300):
     upper = np.percentile(preds, 97.5)
 
     return lower, upper
-
+# Changed fetures for 'What-If"-Scenario
 def display_changes_compact(user, user2):
     """
-    Display only the changes in a compact format
+    Return only the changes in a compact markdown-ready format
     """
     differences = []
     for col in user.columns:
         val1 = user[col].iloc[0]
         val2 = user2[col].iloc[0]
         if val1 != val2:
-            differences.append(f"**{col}**: {val1} → {val2}")
-    
-    if differences:
-        for diff in differences:
-            st.markdown(diff)
-    else:
-        st.info("No changes detected.")
+            differences.append(f"* **{col}**: {val1} → {val2}")
+    return differences
 
+# Get feature Importances
 def compute_shap_plot(model, user, user2=None):
     """
     Compute SHAP plot with optional What-If comparison.
@@ -249,7 +251,7 @@ def compute_shap_plot(model, user, user2=None):
                 # Add label for What-If value
                 label_x = whatif_value#whatif_value + (0.02 if whatif_value > 0 else -0.02)
                 alignment = 'left' if whatif_value > 0 else 'right'
-                ax.text(label_x, y_position, f' {whatif_value:.2f}  ', 
+                ax.text(label_x, y_position, f'  {whatif_value:.2f} ', 
                        va='center', ha=alignment, fontsize=8, 
                        color='#0055A4')
 
@@ -264,14 +266,14 @@ def compute_shap_plot(model, user, user2=None):
     # Add legend
     from matplotlib.patches import Patch
     from matplotlib.lines import Line2D
-    
+
     legend_elements = [
-        Patch(facecolor="#d33650", label='Risk ↑ (Highly Modifiable)', alpha=0.9),
-        Patch(facecolor='#fb7185', label='Risk ↑ (Moderately Modifiable)', alpha=0.9),
-        Patch(facecolor='#fda4af', label='Risk ↑ (Non-modifiable)', alpha=0.9),
-        Patch(facecolor='#15803d', label='Risk ↓ (Highly Modifiable)', alpha=0.9),
-        Patch(facecolor='#16a34a', label='Risk ↓ (Moderately Modifiable)', alpha=0.9),
-        Patch(facecolor='#86efac', label='Risk ↓ (Non-modifiable)', alpha=0.9),
+        Patch(facecolor='#f43f5e', label='Risk ↑ (Highly Modifiable)', alpha=0.9),
+        Patch(facecolor="#f78495", label='Risk ↑ (Moderately Modifiable)', alpha=0.9),
+        Patch(facecolor="#fcbbc3", label='Risk ↑ (Non-modifiable)', alpha=0.9),
+        Patch(facecolor="#0c632c", label='Risk ↓ (Highly Modifiable)', alpha=0.9),
+        Patch(facecolor="#569C70", label='Risk ↓ (Moderately Modifiable)', alpha=0.9),
+        Patch(facecolor="#94d1ab", label='Risk ↓ (Non-modifiable)', alpha=0.9),
     ]
     
     # Add What-If legend item if applicable
@@ -291,6 +293,10 @@ def compute_shap_plot(model, user, user2=None):
 
     return fig, importance_df
 
+#--------------------------------------------------------------------------
+### App
+#--------------------------------------------------------------------------
+
 # Page config
 st.set_page_config(page_title="Test Yourself", page_icon="❤️", layout="wide")
 st.title(" ❤️ Get your cardiovascular risk profile")
@@ -302,278 +308,56 @@ if "profile_submitted" not in st.session_state:
     st.session_state["risk_value2"] = False
     st.session_state["plot_generated"] = False
 
+#####
 col_left, col_right = st.columns([1, 2], gap="large")
 with col_left:
 
     tab1, tab2,  = st.tabs(["Your Data", "What if?"])
+#---------------------------------------------------------------------------
+### User Data
     with tab1:      
-
-        with st.expander("Demographics"):
-            # Sex
-            sex_value = st.segmented_control(
-                "Select your Sex:", 
-                ["Female", "Male"], 
-                help="The model was only trained with binary sex data, therefore we cannot offer non-binary sex options at this time.",
-                default=st.session_state.get("sex_value")
-            )
-
-            # Age
-            age_value = st.number_input(
-                "Enter your age:", 
-                min_value=18, 
-                max_value=120, 
-                value=st.session_state.get("age_value")
-            )
-            if age_value is not None:
-                age_cat = assign_age_cat(age_value)
-                
-            # Race
-            race_options = ["Asian", "American Indian/Alaskan Native", "Black", "Hispanic", "White", "Other"]
-
-            race_cat = st.selectbox(
-                "Which of these groups best represents your race?",
-                race_options,
-                index=race_options.index(st.session_state.race_cat) if "race_cat" in st.session_state and st.session_state.race_cat in race_options else None
-            )   
-
-        with st.expander("General Health and Lifestyle"): 
-            health_cat = st.segmented_control(
-                "How would you rate your general health?", 
-                ["Excellent", "Very good", "Good", "Fair", "Poor"], 
-                default=st.session_state.get("health_cat")
-            )
-            # Height
-            height_value = st.number_input(
-                "Enter your height in cm:", 
-                min_value=50, 
-                max_value=250, 
-                value=st.session_state.get("height_value")
-            )
-
-            # Weight
-            weight_value = st.number_input(
-                "Enter your weight in kg:", 
-                min_value=20, 
-                max_value=300, 
-                value=st.session_state.get("weight_value")
-            )
-
-            # Calculate BMI
-            if height_value != None and weight_value != None:
-                bmi_value = weight_value / ((height_value / 100) ** 2)
-                st.info(f"📊 Your BMI is: **{round(bmi_value, 2)}**")
-
-            # Sleep	
-            sleep_value = st.select_slider(
-                "How many hours of sleep do you get?", 
-                range(0, 25), 
-                help="On average during 24 hours.", 
-                value=st.session_state.get("sleep_value")
-            )
-        
-            # Difficulty walking
-            walk_value = st.segmented_control(
-                "Do you have trouble walking or climbing stairs?", 
-                ["No", "Yes"], 
-                default=st.session_state.get("walk_value")
-            )
-            # Smoking
-            smoker_value = st.segmented_control(
-                "Were you ever a smoker?", 
-                ["No", "Yes"], 
-                default=st.session_state.get("smoker_value")
-            )
-            # Alcohol drinking
-            alc_value = st.number_input(
-                "How many alcoholic drinks do you drink per week?", 
-                min_value=0, 
-                max_value=99, 
-                value=st.session_state.get("alc_value")
-            )
-            if alc_value is not None:
-                if (alc_value > 14 and sex_value == "Male") or (alc_value > 7 and sex_value == "Female"):
-                    st.info("⚠️ High alcohol consumption for your sex.")
-                    alc_cat = "Yes"
-                else:
-                    alc_cat = "No"
-
-            st.write("**On how many days in the last 30 days:**")
-            # Excercise
-            excercise_value = st.select_slider(
-                "Did you excercise?", 
-                range(0, 31), 
-                value=st.session_state.get("excercise_value")
-            )
-            # Physical health
-            physhealth_value = st.select_slider(
-                "Was your physical health not good?", 
-                range(0, 31), 
-                value=st.session_state.get("physhealth_value"),
-                help="This includes physical illness and injury."
-            )
-
-            # Mental health
-            mentalhealth_value = st.select_slider(
-                "Was your mental health poor?", 
-                range(0, 31), 
-                value=st.session_state.get("mentalhealth_value"),
-                help="This includes stress, depression, and problems with emotions."
-            )
-
-        with st.expander("Disease History"):
-            # Diabetes
-            diabetes_value = st.segmented_control(
-                "Do you have diabetes?", 
-                ["No", "No, borderline diabetes", "Yes (during pregnancy)", "Yes"], 
-                #vertical=True,
-                default=st.session_state.get("diabetes_value")
-            )
-            # asthma
-            asthma_value = st.segmented_control(
-                "Did you ever have asthma?", 
-                ["No", "Yes"], 
-                default=st.session_state.get("asthma_value")
-            )
-            # Kidney disease
-            kidney_value = st.segmented_control(
-                "Did you ever have a kidney disease?", 
-                ["No", "Yes"], 
-                help="Apart from other than stones, bladder infection, or incontinence.",
-                default=st.session_state.get("kidney_value")
-            )
-            # Skin Cancer
-            skin_value = st.segmented_control(
-                "Did you ever have skin cancer?", 
-                ["No", "Yes"], 
-                default=st.session_state.get("skin_value")
-            )
-            # stroke
-            stroke_value = st.segmented_control(
-                "Did you ever have a stroke?", 
-                ["No", "Yes"], 
-                default=st.session_state.get("stroke_value")
-            )
-
-            # Add some spacing
-            st.write("")
-
-            required_fields = {
-            "sex": sex_value,
-            "age": age_value,
-            "race": race_cat,
-            "general_health": health_cat,
-            "sleep": sleep_value,
-            "smoking": smoker_value,
-            "diabetes": diabetes_value,
-            "height": height_value,
-            "weight": weight_value,
-            "alcohol": alc_value,
-            "stroke": stroke_value,
-            "asthma": asthma_value,
-            "kidney": kidney_value,
-            "skin_cancer": skin_value,
-            "exercise": excercise_value,
-            "mental_health": mentalhealth_value,
-            "difficulty_walking": walk_value,
-            "physhealth_value": physhealth_value
-        }
-
-        st.write(":gray[Please fill out all fields to enable saving your profile.]", )
-        all_filled = all(v not in (None, "", []) for v in required_fields.values())
-        # Submit button to save profile
-        if st.button("💾 Save Profile & Get Risk Estimate",
-            type="primary",
-            use_container_width=True,
-            disabled=not all_filled): 
-            
-            # Save all values to session state FIRST
-            st.session_state["sex_value"] = sex_value
-            st.session_state["age_value"] = age_value
-            st.session_state["race_cat"] = race_cat
-            st.session_state["age_cat"] = age_cat
-            st.session_state["health_cat"] = health_cat
-            st.session_state["sleep_value"] = sleep_value
-            st.session_state["smoker_value"] = smoker_value
-            st.session_state["diabetes_value"] = diabetes_value
-            st.session_state["height_value"] = height_value
-            st.session_state["weight_value"] = weight_value
-            st.session_state["bmi_value"] = bmi_value
-            st.session_state["alc_value"] = alc_value
-            st.session_state["alc_cat"] = alc_cat 
-            st.session_state["stroke_value"] = stroke_value
-            st.session_state["asthma_value"] = asthma_value
-            st.session_state["kidney_value"] = kidney_value
-            st.session_state["skin_value"] = skin_value
-            st.session_state["excercise_value"] = excercise_value
-            st.session_state["mentalhealth_value"] = mentalhealth_value
-            st.session_state["walk_value"] = walk_value   
-            st.session_state["physhealth_value"] = physhealth_value     
-
-            
-            with st.spinner("Estimating your heart attack risk..."):
-                # Load model and make prediction
-
-                PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-                MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_gradBoost.sav")#logReg.sav")
-                model = pickle.load(open(MODEL_PATH, 'rb'))
-
-                user = pd.DataFrame({             
-                    'Sex': [sex_value],
-                    'Age': [age_value],
-                    'Race': [race_cat],
-                    'SleepTime': [sleep_value],
-                    'AgeCategory': [age_cat],
-                    'Smoking': [smoker_value], 
-                    'AlcoholDrinking': [alc_cat],
-                    'BMI': [round(bmi_value,2)],
-                    'Diabetic': [diabetes_value],                
-                    'Stroke': [stroke_value],
-                    'Asthma': [asthma_value],
-                    'KidneyDisease': [kidney_value],
-                    'SkinCancer': [skin_value],
-                    'PhysicalActivity':[excercise_value],
-                    'MentalHealth': [mentalhealth_value],
-                    'DiffWalking': [walk_value],
-                    'GenHealth': [health_cat],
-                    'PhysicalHealth': [physhealth_value] 
-                })
-
-                #prediction = model.predict(user)
-                prediction = model.predict_proba(user)[:, 1] #>= 0.5
-                st.session_state["risk_value"] = round(prediction[0]*100,2)  # Store as percentage
-                st.session_state["profile_submitted"] = True
-                st.session_state["just_saved"] = True  # Flag to show we just saved
-                st.session_state["model"] = model  # Store model for later use
-                st.session_state["user_data"] = user  # Store user data for later use
-            
-            st.session_state.scroll_to_top = True
-            st.rerun()
-
-###    2: What if? tab ####
-
-    with tab2:
-        if st.session_state["profile_submitted"] is False:
-            st.write("Please add your data before running a 'What-If' simulation.")
-        else:
+        with st.form("user_input", enter_to_submit=False):
             with st.expander("Demographics"):
-            # Age
-                age_value2 = st.number_input(
+                # Sex
+                sex_value = st.segmented_control(
+                    "Select your Sex:", 
+                    ["Female", "Male"], 
+                    help="The model was only trained with binary sex data, therefore we cannot offer non-binary sex options at this time.",
+                    default=st.session_state.get("sex_value")
+                )
+
+                # Age
+                age_value = st.number_input(
                     "Enter your age:", 
                     min_value=18, 
                     max_value=120, 
                     value=st.session_state.get("age_value"),
-                    key = "age_input_whatif"
+                    key = "input_age"
                 )
-                if age_value is not None:
-                    age_cat = assign_age_cat(age_value)
 
-            
+                    
+                # Race
+                race_options = ["Asian", "American Indian/Alaskan Native", "Black", "Hispanic", "White", "Other"]
+
+                race_cat = st.selectbox(
+                    "Which of these groups best represents your race?",
+                    race_options,
+                    index=race_options.index(st.session_state.race_cat) if "race_cat" in st.session_state and st.session_state.race_cat in race_options else None
+                )   
+
             with st.expander("General Health and Lifestyle"): 
                 health_cat = st.segmented_control(
                     "How would you rate your general health?", 
                     ["Excellent", "Very good", "Good", "Fair", "Poor"], 
-                    default=st.session_state.get("health_cat"),
-                    key = "health_input_whatif"
+                    default=st.session_state.get("health_cat")
+                )
+                # Height
+                height_value = st.number_input(
+                    "Enter your height in cm:", 
+                    min_value=50, 
+                    max_value=250, 
+                    value=st.session_state.get("height_value"),
+                    key = "input_height"
                 )
 
                 # Weight
@@ -582,69 +366,51 @@ with col_left:
                     min_value=20, 
                     max_value=300, 
                     value=st.session_state.get("weight_value"),
-                    key = "weight_input_whatif"
+                    key="input_weight"
                 )
-
-                # Calculate BMI
-                if height_value != None and weight_value != None:
-                    bmi_value = weight_value / ((height_value / 100) ** 2)
-                    st.info(f"📊 Your BMI is: **{round(bmi_value, 2)}**")
 
                 # Sleep	
                 sleep_value = st.select_slider(
                     "How many hours of sleep do you get?", 
                     range(0, 25), 
                     help="On average during 24 hours.", 
-                    value=st.session_state.get("sleep_value"),
-                    key = "sleep_input_whatif"
+                    value=st.session_state.get("sleep_value")
                 )
             
                 # Difficulty walking
                 walk_value = st.segmented_control(
                     "Do you have trouble walking or climbing stairs?", 
                     ["No", "Yes"], 
-                    default=st.session_state.get("walk_value"),
-                    key = "walk_input_whatif"
+                    default=st.session_state.get("walk_value")
                 )
-
                 # Smoking
                 smoker_value = st.segmented_control(
                     "Were you ever a smoker?", 
                     ["No", "Yes"], 
-                    default=st.session_state.get("smoker_value"),
-                    key = "smoker_input_whatif"
+                    default=st.session_state.get("smoker_value")
                 )
-
                 # Alcohol drinking
                 alc_value = st.number_input(
                     "How many alcoholic drinks do you drink per week?", 
                     min_value=0, 
                     max_value=99, 
                     value=st.session_state.get("alc_value"),
-                    key = "alc_input_whatif"
+                    key = "input_alc"
                 )
-                if alc_value is not None:
-                    if (alc_value > 14 and sex_value == "Male") or (alc_value > 7 and sex_value == "Female"):
-                        st.info("⚠️ High alcohol consumption for your sex.")
-                        alc_cat = "Yes"
-                    else:
-                        alc_cat = "No"
 
                 st.write("**On how many days in the last 30 days:**")
                 # Excercise
                 excercise_value = st.select_slider(
                     "Did you excercise?", 
                     range(0, 31), 
-                    value=st.session_state.get("excercise_value"),
-                    key = "exercise_input_whatif"
+                    value=st.session_state.get("excercise_value")
                 )
                 # Physical health
                 physhealth_value = st.select_slider(
                     "Was your physical health not good?", 
                     range(0, 31), 
                     value=st.session_state.get("physhealth_value"),
-                    help="This includes physical illness and injury.",
-                    key = "physhealth_input_whatif"
+                    help="This includes physical illness and injury."
                 )
 
                 # Mental health
@@ -652,8 +418,7 @@ with col_left:
                     "Was your mental health poor?", 
                     range(0, 31), 
                     value=st.session_state.get("mentalhealth_value"),
-                    help="This includes stress, depression, and problems with emotions.",
-                    key = "mentalhealth_input_whatif"
+                    help="This includes stress, depression, and problems with emotions."
                 )
 
             with st.expander("Disease History"):
@@ -662,50 +427,113 @@ with col_left:
                     "Do you have diabetes?", 
                     ["No", "No, borderline diabetes", "Yes (during pregnancy)", "Yes"], 
                     #vertical=True,
-                    default=st.session_state.get("diabetes_value"),
-                    key = "diabetes_input_whatif"
+                    default=st.session_state.get("diabetes_value")
                 )
                 # asthma
                 asthma_value = st.segmented_control(
                     "Did you ever have asthma?", 
                     ["No", "Yes"], 
-                    default=st.session_state.get("asthma_value"),
-                    key = "asthma_input_whatif"
+                    default=st.session_state.get("asthma_value")
                 )
                 # Kidney disease
                 kidney_value = st.segmented_control(
                     "Did you ever have a kidney disease?", 
                     ["No", "Yes"], 
                     help="Apart from other than stones, bladder infection, or incontinence.",
-                    default=st.session_state.get("kidney_value"),
-                    key = "kidney_input_whatif"
+                    default=st.session_state.get("kidney_value")
                 )
                 # Skin Cancer
                 skin_value = st.segmented_control(
                     "Did you ever have skin cancer?", 
                     ["No", "Yes"], 
-                    default=st.session_state.get("skin_value"),
-                    key = "skin_input_whatif"
+                    default=st.session_state.get("skin_value")
                 )
                 # stroke
                 stroke_value = st.segmented_control(
                     "Did you ever have a stroke?", 
                     ["No", "Yes"], 
-                    default=st.session_state.get("stroke_value"),
-                    key = "stroke_input_whatif"
+                    default=st.session_state.get("stroke_value")
                 )
 
                 # Add some spacing
                 st.write("")
 
+                required_fields = {
+                "sex": sex_value,
+               # "age": age_value,
+                "race": race_cat,
+                "general_health": health_cat,
+                "sleep": sleep_value,
+                "smoking": smoker_value,
+                "diabetes": diabetes_value,
+                "height": height_value,
+                "weight": weight_value,
+                "alcohol": alc_value,
+                "stroke": stroke_value,
+                "asthma": asthma_value,
+                "kidney": kidney_value,
+                "skin_cancer": skin_value,
+                "exercise": excercise_value,
+                "mental_health": mentalhealth_value,
+                "difficulty_walking": walk_value,
+                "physhealth_value": physhealth_value
+            }
+
+            st.write(":gray[Please fill out all fields to enable saving your profile.]", )
+            all_filled = all(v not in (None, "", []) for v in required_fields.values())
             # Submit button to save profile
-            if st.button("💾 Save 'What if'-Scenario & Get Risk Estimate",
-                key = "prediction_input_whatif",
+            if st.form_submit_button("💾 Save Profile & Get Risk Estimate",
                 type="primary",
-                use_container_width=True): 
+                use_container_width=True,
+                #disabled=not all_filled # did not get to work with form
+                ): 
+
+                # calculate features
+                # age category
+                age_cat = assign_age_cat(age_value)
+                
+                # Calculate BMI
+                bmi_value = weight_value / ((height_value / 100) ** 2)
+                
+                
+                # alcoholDrinking
+                if (alc_value > 14 and sex_value == "Male") or (alc_value > 7 and sex_value == "Female"):
+                    alc_cat = "Yes"
+                else:
+                    alc_cat = "No"
+                
+                # Save all values to session state FIRST
+                st.session_state["sex_value"] = sex_value
+                st.session_state["age_value"] = age_value
+                st.session_state["race_cat"] = race_cat
+                st.session_state["age_cat"] = age_cat
+                st.session_state["health_cat"] = health_cat
+                st.session_state["sleep_value"] = sleep_value
+                st.session_state["smoker_value"] = smoker_value
+                st.session_state["diabetes_value"] = diabetes_value
+                st.session_state["height_value"] = height_value
+                st.session_state["weight_value"] = weight_value
+                st.session_state["bmi_value"] = bmi_value
+                st.session_state["alc_value"] = alc_value
+                st.session_state["alc_cat"] = alc_cat 
+                st.session_state["stroke_value"] = stroke_value
+                st.session_state["asthma_value"] = asthma_value
+                st.session_state["kidney_value"] = kidney_value
+                st.session_state["skin_value"] = skin_value
+                st.session_state["excercise_value"] = excercise_value
+                st.session_state["mentalhealth_value"] = mentalhealth_value
+                st.session_state["walk_value"] = walk_value   
+                st.session_state["physhealth_value"] = physhealth_value     
+
                 
                 with st.spinner("Estimating your heart attack risk..."):
-                    user2 = pd.DataFrame({             
+                    # Load model and make prediction
+
+                    PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+                    MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_gradBoost.sav")#logReg.sav")
+                    model = pickle.load(open(MODEL_PATH, 'rb'))
+
+                    user = pd.DataFrame({             
                         'Sex': [sex_value],
                         'Age': [age_value],
                         'Race': [race_cat],
@@ -713,7 +541,7 @@ with col_left:
                         'AgeCategory': [age_cat],
                         'Smoking': [smoker_value], 
                         'AlcoholDrinking': [alc_cat],
-                        'BMI': [round(bmi_value, 2)],
+                        'BMI': [round(bmi_value,2)],
                         'Diabetic': [diabetes_value],                
                         'Stroke': [stroke_value],
                         'Asthma': [asthma_value],
@@ -727,26 +555,221 @@ with col_left:
                     })
 
                     #prediction = model.predict(user)
-                    model = st.session_state["model"]
-                    prediction = model.predict_proba(user2)[:, 1] #>= 0.5
-                    st.session_state["risk_value2"] = round(prediction[0]*100,2)  # Store as percentage
-                    st.session_state["profile_submitted2"] = True
-                    st.session_state["just_saved2"] = True  # Flag to show we just saved
-                    st.session_state["user_data2"] = user2  # Store user data for later use
+                    prediction = model.predict_proba(user)[:, 1] #>= 0.5
+                    st.session_state["risk_value"] = round(prediction[0]*100,2)  # Store as percentage
+                    st.session_state["profile_submitted"] = True
+                    st.session_state["just_saved"] = True  # Flag to show we just saved
+                    st.session_state["model"] = model  # Store model for later use
+                    st.session_state["user_data"] = user  # Store user data for later use
                 
                 st.session_state.scroll_to_top = True
                 st.rerun()
+#-----------------------------------------------------------------------------
+### What if? tab
+    with tab2:
+        if st.session_state["profile_submitted"] is False:
+            st.write("Please add your data before running a 'What-If' simulation.")
+        else:
+            with st.form("user_input2"):
+        
+                with st.expander("Demographics"):
+                # Age
+                    age_value2 = st.number_input(
+                        "Enter your age:", 
+                        min_value=18, 
+                        max_value=120, 
+                        value=st.session_state.get("age_value"),
+                        key = "age_input_whatif"
+                    )
+                         
+                with st.expander("General Health and Lifestyle"): 
+                    health_cat = st.segmented_control(
+                        "How would you rate your general health?", 
+                        ["Excellent", "Very good", "Good", "Fair", "Poor"], 
+                        default=st.session_state.get("health_cat"),
+                        key = "health_input_whatif"
+                    )
+
+                    # Weight
+                    weight_value = st.number_input(
+                        "Enter your weight in kg:", 
+                        min_value=20, 
+                        max_value=300, 
+                        value=st.session_state.get("weight_value"),
+                        key = "weight_input_whatif"
+                    )
+
+                    # Sleep	
+                    sleep_value = st.select_slider(
+                        "How many hours of sleep do you get?", 
+                        range(0, 25), 
+                        help="On average during 24 hours.", 
+                        value=st.session_state.get("sleep_value"),
+                        key = "sleep_input_whatif"
+                    )
+                
+                    # Difficulty walking
+                    walk_value = st.segmented_control(
+                        "Do you have trouble walking or climbing stairs?", 
+                        ["No", "Yes"], 
+                        default=st.session_state.get("walk_value"),
+                        key = "walk_input_whatif"
+                    )
+
+                    # Smoking
+                    smoker_value = st.segmented_control(
+                        "Were you ever a smoker?", 
+                        ["No", "Yes"], 
+                        default=st.session_state.get("smoker_value"),
+                        key = "smoker_input_whatif"
+                    )
+
+                    # Alcohol drinking
+                    alc_value = st.number_input(
+                        "How many alcoholic drinks do you drink per week?", 
+                        min_value=0, 
+                        max_value=99, 
+                        value=st.session_state.get("alc_value"),
+                        key = "alc_input_whatif"
+                    )
+
+                    st.write("**On how many days in the last 30 days:**")
+                    # Excercise
+                    excercise_value = st.select_slider(
+                        "Did you excercise?", 
+                        range(0, 31), 
+                        value=st.session_state.get("excercise_value"),
+                        key = "exercise_input_whatif"
+                    )
+                    # Physical health
+                    physhealth_value = st.select_slider(
+                        "Was your physical health not good?", 
+                        range(0, 31), 
+                        value=st.session_state.get("physhealth_value"),
+                        help="This includes physical illness and injury.",
+                        key = "physhealth_input_whatif"
+                    )
+
+                    # Mental health
+                    mentalhealth_value = st.select_slider(
+                        "Was your mental health poor?", 
+                        range(0, 31), 
+                        value=st.session_state.get("mentalhealth_value"),
+                        help="This includes stress, depression, and problems with emotions.",
+                        key = "mentalhealth_input_whatif"
+                    )
+
+                with st.expander("Disease History"):
+                    # Diabetes
+                    diabetes_value = st.segmented_control(
+                        "Do you have diabetes?", 
+                        ["No", "No, borderline diabetes", "Yes (during pregnancy)", "Yes"], 
+                        #vertical=True,
+                        default=st.session_state.get("diabetes_value"),
+                        key = "diabetes_input_whatif"
+                    )
+                    # asthma
+                    asthma_value = st.segmented_control(
+                        "Did you ever have asthma?", 
+                        ["No", "Yes"], 
+                        default=st.session_state.get("asthma_value"),
+                        key = "asthma_input_whatif"
+                    )
+                    # Kidney disease
+                    kidney_value = st.segmented_control(
+                        "Did you ever have a kidney disease?", 
+                        ["No", "Yes"], 
+                        help="Apart from other than stones, bladder infection, or incontinence.",
+                        default=st.session_state.get("kidney_value"),
+                        key = "kidney_input_whatif"
+                    )
+                    # Skin Cancer
+                    skin_value = st.segmented_control(
+                        "Did you ever have skin cancer?", 
+                        ["No", "Yes"], 
+                        default=st.session_state.get("skin_value"),
+                        key = "skin_input_whatif"
+                    )
+                    # stroke
+                    stroke_value = st.segmented_control(
+                        "Did you ever have a stroke?", 
+                        ["No", "Yes"], 
+                        default=st.session_state.get("stroke_value"),
+                        key = "stroke_input_whatif"
+                    )
+
+                    # Add some spacing
+                    st.write("")
+
+                # Submit button to save profile
+                if st.form_submit_button("💾 Save 'What if'-Scenario & Get Risk Estimate",
+                    key = "prediction_input_whatif",
+                    type="primary",
+                    use_container_width=True): 
+
+                    # age
+                    age_cat = assign_age_cat(age_value)
+
+                    # Calculate BMI
+                    bmi_value = weight_value / ((height_value / 100) ** 2)
+                    st.info(f"📊 Your BMI is: **{round(bmi_value, 2)}**")
+
+                    # alc
+                    if (alc_value > 14 and sex_value == "Male") or (alc_value > 7 and sex_value == "Female"):
+                        alc_cat = "Yes"
+                    else:
+                        alc_cat = "No"
+                    
+                    with st.spinner("Estimating your heart attack risk..."):
+                        user2 = pd.DataFrame({             
+                            'Sex': [sex_value],
+                            'Age': [age_value],
+                            'Race': [race_cat],
+                            'SleepTime': [sleep_value],
+                            'AgeCategory': [age_cat],
+                            'Smoking': [smoker_value], 
+                            'AlcoholDrinking': [alc_cat],
+                            'BMI': [round(bmi_value, 2)],
+                            'Diabetic': [diabetes_value],                
+                            'Stroke': [stroke_value],
+                            'Asthma': [asthma_value],
+                            'KidneyDisease': [kidney_value],
+                            'SkinCancer': [skin_value],
+                            'PhysicalActivity':[excercise_value],
+                            'MentalHealth': [mentalhealth_value],
+                            'DiffWalking': [walk_value],
+                            'GenHealth': [health_cat],
+                            'PhysicalHealth': [physhealth_value] 
+                        })
+
+                        #prediction = model.predict(user)
+                        model = st.session_state["model"]
+                        prediction = model.predict_proba(user2)[:, 1] #>= 0.5
+                        st.session_state["risk_value2"] = round(prediction[0]*100,2)  # Store as percentage
+                        st.session_state["profile_submitted2"] = True
+                        st.session_state["just_saved2"] = True  # Flag to show we just saved
+                        st.session_state["user_data2"] = user2  # Store user data for later use
+                    
+                    st.session_state.scroll_to_top = True
+                    st.rerun()
     
     # Display results in col_right
     if st.session_state["profile_submitted2"]:
         with col_left:
             with tab2:
                 st.success("✅ Profile saved!")
+                st.info(f"📊 Your BMI is: **{round(st.session_state["bmi_value"], 2)}**") # maybe get from session_state user to not confuse with whatif?
+                if st.session_state["alc_cat"] == "Yes":
+                    st.info("⚠️ High alcohol consumption.")
+
     if st.session_state["profile_submitted"]: #and st.session_state["plot_generated"] is False:
         st.session_state["plot_generated"] = True
         with col_left:
             with tab1:
                 st.success("✅ Profile saved!")
+                st.info(f"📊 Your BMI is: **{round(st.session_state["bmi_value"], 2)}**")
+                if st.session_state["alc_cat"] == "Yes":
+                    st.info("⚠️ High alcohol consumption.")
         with col_right:
             col1, col2 = st.columns([1,1])
             with col1:
@@ -763,17 +786,7 @@ with col_left:
                 st.write(f":grey[🔎 **95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%]")
                 # END CI
             with col2:
-                def display_changes_compact(user, user2):
-                    """
-                    Return only the changes in a compact markdown-ready format
-                    """
-                    differences = []
-                    for col in user.columns:
-                        val1 = user[col].iloc[0]
-                        val2 = user2[col].iloc[0]
-                        if val1 != val2:
-                            differences.append(f"* **{col}**: {val1} → {val2}")
-                    return differences
+
 
 
                 if st.session_state["risk_value2"] is not False:
@@ -901,7 +914,7 @@ with col_left:
             )
 
             # Show gauge in Streamlit
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='content')
             # End Gauge chart
 
             ## Risk interpretation
