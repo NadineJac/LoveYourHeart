@@ -790,7 +790,7 @@ with col_left:
                     )
 
                     # Assemble infobox content
-                    info_text = ["####  What if?"]
+                    info_text = ["#### 💭 What if?"]
                     info_text.append("##### Changed Risk Factors")
 
                     if differences:                        
