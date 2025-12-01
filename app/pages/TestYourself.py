@@ -203,16 +203,16 @@ def compute_shap_plot(model, user, user2=None):
             if row['modifiability'] == 'highly':
                 return "#0c632c"  # Dark green
             elif row['modifiability'] == 'moderately':
-                return "#3E9E61"  # Medium green
+                return "#569C70"  # Medium green
             else:
-                return "#7fd69f"  # Light green
+                return "#94d1ab"  # Light green
         else:  # Increases risk (rose)
             if row['modifiability'] == 'highly':
                 return '#f43f5e'  # Dark rose
             elif row['modifiability'] == 'moderately':
-                return '#fb7185'  # Medium rose
+                return "#f78495"  # Medium rose
             else:
-                return '#fda4af'  # Light rose
+                return "#fcbbc3"  # Light rose
 
     importance_df['color'] = importance_df.apply(get_color, axis=1)
 
@@ -244,14 +244,14 @@ def compute_shap_plot(model, user, user2=None):
                 
                 # Plot blue dot
                 ax.plot(whatif_value, y_position, 'o', color='#0055A4', 
-                       markersize=8, zorder=5, markeredgecolor='white', markeredgewidth=1)
+                       markersize=8, zorder=5)
                 
                 # Add label for What-If value
                 label_x = whatif_value + (0.002 if whatif_value > 0 else -0.002)
                 alignment = 'left' if whatif_value > 0 else 'right'
                 ax.text(label_x, y_position, f'{whatif_value:.2f}', 
                        va='center', ha=alignment, fontsize=8, 
-                       color='#0055A4', fontweight='bold')
+                       color='#0055A4')
 
     # Add vertical line at zero
     ax.axvline(x=0, color='black', linestyle='-', linewidth=1)
