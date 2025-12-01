@@ -82,23 +82,21 @@ def bootstrap_confidence_interval_single_row(model, user_df, n_bootstrap=300):
     return lower, upper
 
 def display_changes_compact(user, user2):
-                        """
-                        Display only the changes in a compact format
-                        """
-                        st.markdown("#### What-If Summary:")
-                        
-                        differences = []
-                        for col in user.columns:
-                            val1 = user[col].iloc[0]
-                            val2 = user2[col].iloc[0]
-                            if val1 != val2:
-                                differences.append(f"**{col}**: {val1} → {val2}")
-                        
-                        if differences:
-                            for diff in differences:
-                                st.markdown(diff)
-                        else:
-                            st.info("No changes detected.")
+    """
+    Display only the changes in a compact format
+    """
+    differences = []
+    for col in user.columns:
+        val1 = user[col].iloc[0]
+        val2 = user2[col].iloc[0]
+        if val1 != val2:
+            differences.append(f"**{col}**: {val1} → {val2}")
+    
+    if differences:
+        for diff in differences:
+            st.markdown(diff)
+    else:
+        st.info("No changes detected.")
 
 def compute_shap_plot(model, user, user2=None):
     """
@@ -245,7 +243,7 @@ def compute_shap_plot(model, user, user2=None):
                 y_position = list(importance_df['feature']).index(feature)
                 
                 # Plot blue dot
-                ax.plot(whatif_value, y_position, 'o', color='#3b82f6', 
+                ax.plot(whatif_value, y_position, 'o', color='#0055A4', 
                        markersize=8, zorder=5, markeredgecolor='white', markeredgewidth=1)
                 
                 # Add label for What-If value
@@ -253,7 +251,7 @@ def compute_shap_plot(model, user, user2=None):
                 alignment = 'left' if whatif_value > 0 else 'right'
                 ax.text(label_x, y_position, f'{whatif_value:.2f}', 
                        va='center', ha=alignment, fontsize=8, 
-                       color='#3b82f6', fontweight='bold')
+                       color='#0055A4', fontweight='bold')
 
     # Add vertical line at zero
     ax.axvline(x=0, color='black', linestyle='-', linewidth=1)
@@ -279,7 +277,7 @@ def compute_shap_plot(model, user, user2=None):
     # Add What-If legend item if applicable
     if whatif_importances is not None and changed_features:
         legend_elements.append(
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='#3b82f6', 
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='#0055A4', 
                    markersize=8, label='What-If Scenario', markeredgecolor='white')
         )
     
@@ -765,20 +763,54 @@ with col_left:
                 st.write(f":grey[🔎 **95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%]")
                 # END CI
             with col2:
+                def display_changes_compact(user, user2):
+                    """
+                    Return only the changes in a compact markdown-ready format
+                    """
+                    differences = []
+                    for col in user.columns:
+                        val1 = user[col].iloc[0]
+                        val2 = user2[col].iloc[0]
+                        if val1 != val2:
+                            differences.append(f"**{col}**: {val1} → {val2}")
+                    return differences
+
+
                 if st.session_state["risk_value2"] is not False:
                     X_user2 = st.session_state["user_data2"]
-                    display_changes_compact(X_user, X_user2)
-                    st.write("##### Your current 'What-If' heart attack risk factor:", str(st.session_state["risk_value2"]),"%")
-                
-                    # Confidence Interval(CI)
                     model = st.session_state["model"]
+
+                    # Collect changes
+                    differences = display_changes_compact(X_user, X_user2)
+
+                    # Confidence Interval
                     lower_ci2, upper_ci2 = bootstrap_confidence_interval_single_row(
                         model,
                         X_user2
                     )
-                    # Display the confidence interval
-                    st.write(f":grey[🔎 **95% Confidence Interval:** {lower_ci2:.1f}% – {upper_ci2:.1f}%]")
-                    # END CI
+
+                    # Assemble infobox content
+                    info_text = ["####  What if?"]
+                    info_text.append("##### Changed Risk Factors")
+
+                    if differences:                        
+                        info_text.extend(differences)
+                        info_text.append(
+                            f"##### What-If Heart Attack Risk: **{st.session_state['risk_value2']}%**"
+                        )
+
+                        info_text.append(
+                            f":grey[🔎 **95% Confidence Interval:** "
+                            f"{lower_ci2:.1f}% – {upper_ci2:.1f}%]"
+                        )
+                    else:
+                        info_text.append("_No changes detected._")                 
+
+
+                    # Display everything in one infobox
+                    st.info("\n\n".join(info_text))
+
+
             # Gauge plot
             
             # Get risk value and compute confidence interval
@@ -832,9 +864,9 @@ with col_left:
                     ] + (
                         # Add CI and What-If steps if What-If risk is available
                         [
-                            {"range": [lower_ci2, whatif_risk - 0.25,], "color": "#d1ecf1"},  # Light blue
-                            {"range": [whatif_risk -0.25, whatif_risk + 0.25], "color": "#3b82f6"},  # Blue dot as thin step
-                            {"range": [whatif_risk + 0.25, upper_ci2], "color": "#d1ecf1"},  # Light blue
+                            {"range": [lower_ci2, whatif_risk - 0.25,], "color": "#E8E5F3"},  # Light blue
+                            {"range": [whatif_risk -0.25, whatif_risk + 0.25], "color": "#0055A4"},  # Blue dot as thin step
+                            {"range": [whatif_risk + 0.25, upper_ci2], "color": "#E8E5F3"},  # Light blue
                         ] if (whatif_risk is not None and whatif_risk is not False) else []
                     ),
 
