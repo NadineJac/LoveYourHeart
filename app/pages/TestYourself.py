@@ -251,7 +251,7 @@ def compute_shap_plot(model, user, user2=None):
                 # Add label for What-If value
                 label_x = whatif_value#whatif_value + (0.02 if whatif_value > 0 else -0.02)
                 alignment = 'left' if whatif_value > 0 else 'right'
-                ax.text(label_x, y_position, f'  {whatif_value:.2f} ', 
+                ax.text(label_x, y_position, f'  {whatif_value:.2f}  ', 
                        va='center', ha=alignment, fontsize=8, 
                        color='#0055A4')
 
@@ -460,7 +460,7 @@ with col_left:
 
                 required_fields = {
                 "sex": sex_value,
-               # "age": age_value,
+                "age": age_value,
                 "race": race_cat,
                 "general_health": health_cat,
                 "sleep": sleep_value,
@@ -570,7 +570,7 @@ with col_left:
         if st.session_state["profile_submitted"] is False:
             st.write("Please add your data before running a 'What-If' simulation.")
         else:
-            with st.form("user_input2"):
+            with st.form("user_input2", enter_to_submit=False):
         
                 with st.expander("Demographics"):
                 # Age
@@ -757,13 +757,13 @@ with col_left:
     if st.session_state["profile_submitted2"]:
         with col_left:
             with tab2:
-                st.success("✅ Profile saved!")
-                st.info(f"📊 Your BMI is: **{round(st.session_state["bmi_value"], 2)}**") # maybe get from session_state user to not confuse with whatif?
-                if st.session_state["alc_cat"] == "Yes":
-                    st.info("⚠️ High alcohol consumption.")
+                st.success("✅ 'What-If' scenario saved!")
+                user2 = st.session_state["user_data2"]
+                st.info(f"📊 Your BMI would be: **{user2.loc[0,"BMI"]}**") # maybe get from session_state user to not confuse with whatif?
+                if user2.loc[0,"AlcoholDrinking"] == "Yes":
+                    st.info("⚠️ Your alcohol consumption would be high.")
 
-    if st.session_state["profile_submitted"]: #and st.session_state["plot_generated"] is False:
-        st.session_state["plot_generated"] = True
+    if st.session_state["profile_submitted"]:
         with col_left:
             with tab1:
                 st.success("✅ Profile saved!")
@@ -785,136 +785,133 @@ with col_left:
                 # Display the confidence interval
                 st.write(f":grey[🔎 **95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%]")
                 # END CI
+
             with col2:
-
-
-
                 if st.session_state["risk_value2"] is not False:
-                    X_user2 = st.session_state["user_data2"]
-                    model = st.session_state["model"]
+                    with st.spinner("Running the simulation..."):
+                        X_user2 = st.session_state["user_data2"]
+                        model = st.session_state["model"]
 
-                    # Collect changes
-                    differences = display_changes_compact(X_user, X_user2)
+                        # Collect changes
+                        differences = display_changes_compact(X_user, X_user2)
 
-                    # Confidence Interval
-                    lower_ci2, upper_ci2 = bootstrap_confidence_interval_single_row(
-                        model,
-                        X_user2
-                    )
-
-                    # Assemble infobox content
-                    info_text = ["#### 💭 What if?"]
-                    info_text.append("##### Changed Risk Factors")
-
-                    if differences:                        
-                        info_text.extend(differences)
-                        info_text.append(
-                            f"##### What-If Heart Attack Risk: **{st.session_state['risk_value2']}%**"
+                        # Confidence Interval
+                        lower_ci2, upper_ci2 = bootstrap_confidence_interval_single_row(
+                            model,
+                            X_user2
                         )
 
-                        info_text.append(
-                            f"🔎 **95% Confidence Interval:** "
-                            f"{lower_ci2:.1f}% – {upper_ci2:.1f}%"
-                        )
-                    else:
-                        info_text.append("_No changes detected._")                 
+                        # Assemble infobox content
+                        info_text = ["#### 💭 What if?"]
+                        info_text.append("##### Changed Risk Factors")
 
+                        if differences:                        
+                            info_text.extend(differences)
+                            info_text.append(
+                                f"##### What-If Heart Attack Risk: **{st.session_state['risk_value2']}%**"
+                            )
 
+                            info_text.append(
+                                f"🔎 **95% Confidence Interval:** "
+                                f"{lower_ci2:.1f}% – {upper_ci2:.1f}%"
+                            )
+                        else:
+                            info_text.append("_No changes detected._")   
                     # Display everything in one infobox
                     st.info("\n\n".join(info_text))
 
-
-            # Gauge plot
+# Gauge plot ----------------------------------------------------------
             
             # Get risk value and compute confidence interval
-            risk_percent = st.session_state["risk_value"]
-            model = st.session_state["model"]
-            X_user = st.session_state["user_data"]
+            with st.spinner("Plotting your risk..."):
+                risk_percent = st.session_state["risk_value"]
+                model = st.session_state["model"]
+                X_user = st.session_state["user_data"]
 
-            lower_ci, upper_ci = bootstrap_confidence_interval_single_row(
-                model,
-                X_user
-            )
+                lower_ci, upper_ci = bootstrap_confidence_interval_single_row(
+                    model,
+                    X_user
+                )
 
-            # Optional: Get What-If risk if available
-            whatif_risk = st.session_state.get("risk_value2", None)
+                # Optional: Get What-If risk if available
+                whatif_risk = st.session_state.get("risk_value2", None)
 
-            # Create gauge chart
-            fig = go.Figure(go.Indicator(
-                mode="gauge+number",
-                value=risk_percent,
-                
-                number={
-                    "suffix": "%",
-                    "font": {"size": 48, "family": "Arial, sans-serif", "color": "#C2185B"}
-                },
-
-                title={
-                    "text": "<b>Heart Risk Level</b>",
-                    "font": {"size": 26, "family": "Arial, sans-serif", "color": "#880E4F"}
-                },
-
-                gauge={
-                    "axis": {
-                        "range": [0, 100], 
-                        "tickwidth": 1, 
-                        "tickcolor": "#C2185B",
-                        "showticklabels": True
+                # Create gauge chart
+                fig = go.Figure(go.Indicator(
+                    mode="gauge+number",
+                    value=risk_percent,
+                    
+                    number={
+                        "suffix": "%",
+                        "font": {"size": 48, "family": "Arial, sans-serif", "color": "#C2185B"}
                     },
-                    "borderwidth": 0,
 
-                    # Main needle color
-                    "bar": {"color": "#C2185B", "thickness": 0.40},
+                    title={
+                        "text": "<b>Heart Risk Level</b>",
+                        "font": {"size": 26, "family": "Arial, sans-serif", "color": "#880E4F"}
+                    },
 
-                    # Gradient zones with CI and What-If as steps
-                    "steps": [
-                        {"range": [0, 20], "color": "#FCE4EC"},
-                        {"range": [20, 40], "color": "#F8BBD0"},
-                        {"range": [40, 60], "color": "#F06292"},
-                        {"range": [60, 80], "color": "#E91E63"},
-                        {"range": [80, 100], "color": "#C2185B"},
-                        {"range": [lower_ci, upper_ci], "color": "#DFDBD8"},
-                    ] + (
-                        # Add CI and What-If steps if What-If risk is available
-                        [
-                            {"range": [lower_ci2, whatif_risk - 0.25,], "color": "#E8E5F3"},  # Light blue
-                            {"range": [whatif_risk -0.25, whatif_risk + 0.25], "color": "#0055A4"},  # Blue dot as thin step
-                            {"range": [whatif_risk + 0.25, upper_ci2], "color": "#E8E5F3"},  # Light blue
-                        ] if (whatif_risk is not None and whatif_risk is not False) else []
-                    ),
+                    gauge={
+                        "axis": {
+                            "range": [0, 100], 
+                            "tickwidth": 1, 
+                            "tickcolor": "#C2185B",
+                            "showticklabels": True
+                        },
+                        "borderwidth": 0,
 
-                    # Threshold marker (dark pink) - main point estimate
-                    "threshold": {
-                        "line": {"color": "#880E4F", "width": 6},
-                        "thickness": 0.9,
-                        "value": risk_percent
+                        # Main needle color
+                        "bar": {"color": "#C2185B", "thickness": 0.40},
+
+                        # Gradient zones with CI and What-If as steps
+                        "steps": [
+                            {"range": [0, 20], "color": "#FCE4EC"},
+                            {"range": [20, 40], "color": "#F8BBD0"},
+                            {"range": [40, 60], "color": "#F06292"},
+                            {"range": [60, 80], "color": "#E91E63"},
+                            {"range": [80, 100], "color": "#C2185B"},
+                            {"range": [lower_ci, upper_ci], "color": "#DFDBD8"},
+                        ] + (
+                            # Add CI and What-If steps if What-If risk is available
+                            [
+                                {"range": [lower_ci2, whatif_risk - 0.25,], "color": "#E8E5F3"},  # Light blue
+                                {"range": [whatif_risk -0.25, whatif_risk + 0.25], "color": "#0055A4"},  # Blue dot as thin step
+                                {"range": [whatif_risk + 0.25, upper_ci2], "color": "#E8E5F3"},  # Light blue
+                            ] if (whatif_risk is not None and whatif_risk is not False) else []
+                        ),
+
+                        # Threshold marker (dark pink) - main point estimate
+                        "threshold": {
+                            "line": {"color": "#880E4F", "width": 6},
+                            "thickness": 0.9,
+                            "value": risk_percent
+                        }
                     }
-                }
-            ))
+                ))
 
-            # Add heart emoji - positioned in gauge coordinate system
-            fig.add_annotation(
-                x=0.5,
-                y=0.25,
-                text="❤️",
-                font=dict(size=42, color="crimson"),
-                showarrow=False,
-                xref="paper",
-                yref="paper"
-            )            
+                # Add heart emoji - positioned in gauge coordinate system
+                fig.add_annotation(
+                    x=0.5,
+                    y=0.25,
+                    text="❤️",
+                    font=dict(size=42, color="crimson"),
+                    showarrow=False,
+                    xref="paper",
+                    yref="paper"
+                )            
 
-            fig.update_layout(
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(0,0,0,0)",
-                height=450,
-                margin=dict(l=40, r=40, b=40, t=80),
-                # Remove gridlines
-                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
-            )
+                fig.update_layout(
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    height=450,
+                    margin=dict(l=40, r=40, b=40, t=80),
+                    # Remove gridlines
+                    xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                    yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
+                )
 
-            # Show gauge in Streamlit
-            st.plotly_chart(fig, width='stretch')
+                # Show gauge in Streamlit
+                st.plotly_chart(fig, width='stretch')
             # End Gauge chart
 
             ## Risk interpretation
