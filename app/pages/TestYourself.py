@@ -914,7 +914,7 @@ with col_left:
             )
 
             # Show gauge in Streamlit
-            st.plotly_chart(fig, width='content')
+            st.plotly_chart(fig, width='stretch')
             # End Gauge chart
 
             ## Risk interpretation
