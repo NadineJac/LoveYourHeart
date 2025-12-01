@@ -81,6 +81,152 @@ def bootstrap_confidence_interval_single_row(model, user_df, n_bootstrap=300):
 
     return lower, upper
 
+def display_changes_compact(user, user2):
+                        """
+                        Display only the changes in a compact format
+                        """
+                        st.markdown("#### What-If Summary:")
+                        
+                        differences = []
+                        for col in user.columns:
+                            val1 = user[col].iloc[0]
+                            val2 = user2[col].iloc[0]
+                            if val1 != val2:
+                                differences.append(f"**{col}**: {val1} → {val2}")
+                        
+                        if differences:
+                            for diff in differences:
+                                st.markdown(diff)
+                        else:
+                            st.info("No changes detected.")
+
+def compute_shap_plot(model, user):
+    X_user_preprocessed = model.named_steps["prep"].transform(user)
+    explainer = shap.TreeExplainer(model.named_steps["model"])
+    shap_values = explainer(X_user_preprocessed)
+
+
+    # Get encoded feature names
+    encoded_feature_names = model.named_steps["prep"].get_feature_names_out()
+
+    # Aggregate SHAP values by original feature (keeping the sign!)
+    original_importances = {}
+
+    for i, encoded_name in enumerate(encoded_feature_names):
+        # Extract original feature name
+        if '__' in encoded_name:
+            original_feature = encoded_name.split('__')[1].rsplit('_', 1)[0]
+        else:
+            original_feature = encoded_name.split('_')[0]
+        
+        # Sum SHAP values (keep the sign to show direction)
+        shap_value = shap_values.values[0, i]
+        
+        if original_feature in original_importances:
+            original_importances[original_feature] += shap_value
+        else:
+            original_importances[original_feature] = shap_value
+
+    # Convert to DataFrame
+    importance_df = pd.DataFrame({
+        'feature': list(original_importances.keys()),
+        'shap_value': list(original_importances.values())
+    })
+
+    # Define modifiability levels
+    HIGHLY_MODIFIABLE = {
+        "Smoking",
+        "AlcoholDrinking",
+        "PhysicalActivity",
+        "BMI",
+        "SleepTime",
+    }
+
+    MODERATELY_MODIFIABLE = {
+        "PhysicalHealth",
+        "MentalHealth",
+        "GenHealth",
+        "DiffWalking",
+    }
+
+    # Classify features
+    def get_modifiability(feature):
+        if feature in HIGHLY_MODIFIABLE:
+            return 'highly'
+        elif feature in MODERATELY_MODIFIABLE:
+            return 'moderately'
+        else:
+            return 'non'
+
+    importance_df['modifiability'] = importance_df['feature'].apply(get_modifiability)
+
+    # Sort by absolute value
+    importance_df['abs_shap'] = importance_df['shap_value'].abs()
+    importance_df = importance_df.sort_values('abs_shap', ascending=True)
+
+    # Assign colors based on direction and modifiability
+    def get_color(row):
+        if row['shap_value'] < 0:  # Decreases risk (green)
+            if row['modifiability'] == 'highly':
+                return "#0c632c"  # Dark green
+            elif row['modifiability'] == 'moderately':
+                return "#3E9E61"  # Medium green
+            else:
+                return "#7fd69f"  # Light green
+        else:  # Increases risk (rose)
+            if row['modifiability'] == 'highly':
+                return '#f43f5e'  # Dark rose
+            elif row['modifiability'] == 'moderately':
+                return '#fb7185'  # Medium rose
+            else:
+                return '#fda4af'  # Light rose
+
+    importance_df['color'] = importance_df.apply(get_color, axis=1)
+
+    # Create the plot
+    fig, ax = plt.subplots(figsize=(7, 4))
+
+    bars = ax.barh(importance_df['feature'], importance_df['shap_value'], 
+                color=importance_df['color'], alpha=0.9)
+
+    # Add value labels on bars with modifiability markers
+    for i, (bar, value, modifiability) in enumerate(zip(bars, importance_df['shap_value'], 
+                                                        importance_df['modifiability'])):
+        label_x = value + (0.002 if value > 0 else -0.002)
+        alignment = 'left' if value > 0 else 'right'
+                                            
+        ax.text(label_x, bar.get_y() + bar.get_height()/2, 
+                f'{value:.2f}', 
+                va='center', ha=alignment, fontsize=8)
+
+    # Add vertical line at zero
+    ax.axvline(x=0, color='black', linestyle='-', linewidth=1)
+
+    # Labels and title
+    ax.set_xlabel('SHAP Value (Impact on Risk)', fontsize=8)
+    #ax.set_title('Feature Impact on Risk Probability', fontsize=9, pad=20)
+    ax.tick_params(axis="y", labelsize=8)
+    ax.tick_params(axis="y", labelsize=8)
+
+    # Add legend
+    from matplotlib.patches import Patch
+    legend_elements = [
+        Patch(facecolor="#d33650", label='Risk ↑(Highly Modifiable)', alpha=0.9),
+        Patch(facecolor='#fb7185', label='Risk ↑ (Moderately Modifiable)', alpha=0.9),
+        Patch(facecolor='#fda4af', label='Risk ↑ (Non-modifiable)', alpha=0.9),
+        Patch(facecolor='#15803d', label='Risk ↑(Highly Modifiable)', alpha=0.9),
+        Patch(facecolor='#16a34a', label='Risk ↑ (Moderately Modifiable)', alpha=0.9),
+        Patch(facecolor='#86efac', label='Risk ↑ (Non-modifiable)', alpha=0.9),
+    ]
+    ax.legend(handles=legend_elements, loc='best', fontsize=8, framealpha=0)
+
+    # Grid
+    ax.grid(axis='x', alpha=0.3, linestyle='--')
+    ax.set_axisbelow(True)
+    for spine in ["top", "right", "left"]:
+        ax.spines[spine].set_visible(False)
+
+    return fig, importance_df
 
 # Page config
 st.set_page_config(page_title="Test Yourself", page_icon="❤️", layout="wide")
@@ -89,9 +235,9 @@ st.write("Complete your profile to get personalized heart health advice from our
  # Initialize session state if not exists
 if "profile_submitted" not in st.session_state:
     st.session_state["profile_submitted"] = False
-if "profile_submitted2" not in st.session_state:
     st.session_state["profile_submitted2"] = False
     st.session_state["risk_value2"] = False
+    st.session_state["plot_generated"] = False
 
 col_left, col_right = st.columns([1, 2], gap="large")
 with col_left:
@@ -316,7 +462,7 @@ with col_left:
                     'AgeCategory': [age_cat],
                     'Smoking': [smoker_value], 
                     'AlcoholDrinking': [alc_cat],
-                    'BMI': [bmi_value],
+                    'BMI': [round(bmi_value,2)],
                     'Diabetic': [diabetes_value],                
                     'Stroke': [stroke_value],
                     'Asthma': [asthma_value],
@@ -341,10 +487,11 @@ with col_left:
             st.rerun()
 
 ###    2: What if? tab ####
-    if st.session_state["profile_submitted"] is not True:
-        st.write("Please add your data before running a 'What-If' simulation.")
-    else:
-        with tab2:
+
+    with tab2:
+        if st.session_state["profile_submitted"] is False:
+            st.write("Please add your data before running a 'What-If' simulation.")
+        else:
             with st.expander("Demographics"):
             # Age
                 age_value2 = st.number_input(
@@ -489,7 +636,7 @@ with col_left:
                 st.write("")
 
             # Submit button to save profile
-            if st.button("💾 Save Profile & Get Risk Estimate",
+            if st.button("💾 Save 'What if'-Scenario & Get Risk Estimate",
                 key = "prediction_input_whatif",
                 type="primary",
                 use_container_width=True): 
@@ -503,7 +650,7 @@ with col_left:
                         'AgeCategory': [age_cat],
                         'Smoking': [smoker_value], 
                         'AlcoholDrinking': [alc_cat],
-                        'BMI': [bmi_value],
+                        'BMI': [round(bmi_value, 2)],
                         'Diabetic': [diabetes_value],                
                         'Stroke': [stroke_value],
                         'Asthma': [asthma_value],
@@ -532,30 +679,19 @@ with col_left:
         with col_left:
             with tab2:
                 st.success("✅ Profile saved!")
-    if st.session_state["profile_submitted"]:
+    if st.session_state["profile_submitted"]: #and st.session_state["plot_generated"] is False:
+        st.session_state["plot_generated"] = True
         with col_left:
             with tab1:
                 st.success("✅ Profile saved!")
         with col_right:
-            st.write("#### Your current heart attack risk factor:", str(st.session_state["risk_value"]),"%")
-            
-            # Confidence Interval(CI)
-            model = st.session_state["model"]
-            X_user = st.session_state["user_data"]
-            lower_ci, upper_ci = bootstrap_confidence_interval_single_row(
-                model,
-                X_user
-            )
-            # Display the confidence interval
-            st.write(f":grey[🔎 **95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%]")
-            # END CI
-
-            if st.session_state["risk_value2"] is not False:
-                st.write("##### Your current 'What-If' heart attack risk factor:", str(st.session_state["risk_value2"]),"%")
+            col1, col2 = st.columns([1,1])
+            with col1:
+                st.write("#### Your current heart attack risk factor:", str(st.session_state["risk_value"]),"%")
             
                 # Confidence Interval(CI)
                 model = st.session_state["model"]
-                X_user = st.session_state["user_data2"]
+                X_user = st.session_state["user_data"]
                 lower_ci, upper_ci = bootstrap_confidence_interval_single_row(
                     model,
                     X_user
@@ -563,6 +699,21 @@ with col_left:
                 # Display the confidence interval
                 st.write(f":grey[🔎 **95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%]")
                 # END CI
+            with col2:
+                if st.session_state["risk_value2"] is not False:
+                    X_user2 = st.session_state["user_data2"]
+                    display_changes_compact(X_user, X_user2)
+                    st.write("##### Your current 'What-If' heart attack risk factor:", str(st.session_state["risk_value2"]),"%")
+                
+                    # Confidence Interval(CI)
+                    model = st.session_state["model"]
+                    lower_ci2, upper_ci2 = bootstrap_confidence_interval_single_row(
+                        model,
+                        X_user2
+                    )
+                    # Display the confidence interval
+                    st.write(f":grey[🔎 **95% Confidence Interval:** {lower_ci2:.1f}% – {upper_ci2:.1f}%]")
+                    # END CI
             
             # Gauge chart
             risk_percent = st.session_state["risk_value"]
@@ -627,7 +778,7 @@ with col_left:
             # End Gauge chart
 
 
-            # Risk interpretation
+            ## Risk interpretation
             if st.session_state["risk_value"] >= 25:
                 st.error("🚨 High Risk! Please consult a healthcare professional for a comprehensive evaluation.")
             elif st.session_state["risk_value"] >= 10:
@@ -636,135 +787,7 @@ with col_left:
                 st.info("✅ Low Risk. Maintain a healthy lifestyle to keep your risk low.") 
 
             ### start feature importance chart
-            # Get SHAP values for your user
-
-            def compute_shap_plot(model, user):
-                X_user_preprocessed = model.named_steps["prep"].transform(user)
-                explainer = shap.TreeExplainer(model.named_steps["model"])
-                shap_values = explainer(X_user_preprocessed)
-
-                # Get encoded feature names
-                encoded_feature_names = model.named_steps["prep"].get_feature_names_out()
-
-                # Aggregate SHAP values by original feature (keeping the sign!)
-                original_importances = {}
-
-                for i, encoded_name in enumerate(encoded_feature_names):
-                    # Extract original feature name
-                    if '__' in encoded_name:
-                        original_feature = encoded_name.split('__')[1].rsplit('_', 1)[0]
-                    else:
-                        original_feature = encoded_name.split('_')[0]
-                    
-                    # Sum SHAP values (keep the sign to show direction)
-                    shap_value = shap_values.values[0, i]
-                    
-                    if original_feature in original_importances:
-                        original_importances[original_feature] += shap_value
-                    else:
-                        original_importances[original_feature] = shap_value
-
-                # Convert to DataFrame
-                importance_df = pd.DataFrame({
-                    'feature': list(original_importances.keys()),
-                    'shap_value': list(original_importances.values())
-                })
-
-                # Define modifiability levels
-                HIGHLY_MODIFIABLE = {
-                    "Smoking",
-                    "AlcoholDrinking",
-                    "PhysicalActivity",
-                    "BMI",
-                    "SleepTime",
-                }
-
-                MODERATELY_MODIFIABLE = {
-                    "PhysicalHealth",
-                    "MentalHealth",
-                    "GenHealth",
-                    "DiffWalking",
-                }
-
-                # Classify features
-                def get_modifiability(feature):
-                    if feature in HIGHLY_MODIFIABLE:
-                        return 'highly'
-                    elif feature in MODERATELY_MODIFIABLE:
-                        return 'moderately'
-                    else:
-                        return 'non'
-
-                importance_df['modifiability'] = importance_df['feature'].apply(get_modifiability)
-
-                # Sort by absolute value
-                importance_df['abs_shap'] = importance_df['shap_value'].abs()
-                importance_df = importance_df.sort_values('abs_shap', ascending=True)
-
-                # Assign colors based on direction and modifiability
-                def get_color(row):
-                    if row['shap_value'] < 0:  # Decreases risk (green)
-                        if row['modifiability'] == 'highly':
-                            return "#0c632c"  # Dark green
-                        elif row['modifiability'] == 'moderately':
-                            return "#3E9E61"  # Medium green
-                        else:
-                            return "#7fd69f"  # Light green
-                    else:  # Increases risk (rose)
-                        if row['modifiability'] == 'highly':
-                            return '#f43f5e'  # Dark rose
-                        elif row['modifiability'] == 'moderately':
-                            return '#fb7185'  # Medium rose
-                        else:
-                            return '#fda4af'  # Light rose
-
-                importance_df['color'] = importance_df.apply(get_color, axis=1)
-
-                # Create the plot
-                fig, ax = plt.subplots(figsize=(7, 4))
-
-                bars = ax.barh(importance_df['feature'], importance_df['shap_value'], 
-                            color=importance_df['color'], alpha=0.9)
-
-                # Add value labels on bars with modifiability markers
-                for i, (bar, value, modifiability) in enumerate(zip(bars, importance_df['shap_value'], 
-                                                                    importance_df['modifiability'])):
-                    label_x = value + (0.002 if value > 0 else -0.002)
-                    alignment = 'left' if value > 0 else 'right'
-                                                       
-                    ax.text(label_x, bar.get_y() + bar.get_height()/2, 
-                            f'{value:.2f}', 
-                            va='center', ha=alignment, fontsize=8)
-
-                # Add vertical line at zero
-                ax.axvline(x=0, color='black', linestyle='-', linewidth=1)
-
-                # Labels and title
-                ax.set_xlabel('SHAP Value (Impact on Risk)', fontsize=8)
-                #ax.set_title('Feature Impact on Risk Probability', fontsize=9, pad=20)
-                ax.tick_params(axis="y", labelsize=8)
-                ax.tick_params(axis="y", labelsize=8)
-
-                # Add legend
-                from matplotlib.patches import Patch
-                legend_elements = [
-                    Patch(facecolor="#d33650", label='Risk ↑(Highly Modifiable)', alpha=0.9),
-                    Patch(facecolor='#fb7185', label='Risk ↑ (Moderately Modifiable)', alpha=0.9),
-                    Patch(facecolor='#fda4af', label='Risk ↑ (Non-modifiable)', alpha=0.9),
-                    Patch(facecolor='#15803d', label='Risk ↑(Highly Modifiable)', alpha=0.9),
-                    Patch(facecolor='#16a34a', label='Risk ↑ (Moderately Modifiable)', alpha=0.9),
-                    Patch(facecolor='#86efac', label='Risk ↑ (Non-modifiable)', alpha=0.9),
-                ]
-                ax.legend(handles=legend_elements, loc='best', fontsize=8, framealpha=0)
-
-                # Grid
-                ax.grid(axis='x', alpha=0.3, linestyle='--')
-                ax.set_axisbelow(True)
-                for spine in ["top", "right", "left"]:
-                    ax.spines[spine].set_visible(False)
-
-                return fig, importance_df
-            
+            # Get SHAP values for your user        
             model = st.session_state["model"]
             user = st.session_state["user_data"]
             fig, importance_df = compute_shap_plot(model, user)
