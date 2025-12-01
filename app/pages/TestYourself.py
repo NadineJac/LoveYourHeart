@@ -860,7 +860,7 @@ with col_left:
                         {"range": [40, 60], "color": "#F06292"},
                         {"range": [60, 80], "color": "#E91E63"},
                         {"range": [80, 100], "color": "#C2185B"},
-                        {"range": [lower_ci, upper_ci], "color": "#bcc4c5"},
+                        {"range": [lower_ci, upper_ci], "color": "#DAD4D0"},
                     ] + (
                         # Add CI and What-If steps if What-If risk is available
                         [
