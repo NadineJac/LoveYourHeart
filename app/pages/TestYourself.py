@@ -772,7 +772,7 @@ with col_left:
                         val1 = user[col].iloc[0]
                         val2 = user2[col].iloc[0]
                         if val1 != val2:
-                            differences.append(f"**{col}**: {val1} → {val2}")
+                            differences.append(f"* **{col}**: {val1} → {val2}")
                     return differences
 
 
