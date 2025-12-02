@@ -574,7 +574,7 @@ with col_left:
         
                 with st.expander("Demographics"):
                 # Age
-                    age_value2 = st.number_input(
+                    age_value = st.number_input(
                         "Enter your age:", 
                         min_value=18, 
                         max_value=120, 
@@ -787,6 +787,7 @@ with col_left:
                 # END CI
 
             with col2:
+# What-if info box---------------------------------------------------------
                 if st.session_state["risk_value2"] is not False:
                     with st.spinner("Running the simulation..."):
                         X_user2 = st.session_state["user_data2"]
@@ -914,7 +915,7 @@ with col_left:
                 st.plotly_chart(fig, width='stretch')
             # End Gauge chart
 
-            ## Risk interpretation
+## Risk tiers -------------------------------------------------------
             if st.session_state["risk_value"] >= 25:
                 st.error("🚨 High Risk! Please consult a healthcare professional for a comprehensive evaluation.")
             elif st.session_state["risk_value"] >= 10:
@@ -922,7 +923,7 @@ with col_left:
             else:
                 st.info("✅ Low Risk. Maintain a healthy lifestyle to keep your risk low.") 
 
-            ### start feature importance chart
+# start feature importance chart ------------------------------------
             # Get SHAP values for your user        
             model = st.session_state["model"]
             user = st.session_state["user_data"]
@@ -934,6 +935,7 @@ with col_left:
                 with st.spinner('Plotting importances...'):
                     fig, importance_df = compute_shap_plot(model, user)
 
+# advide based on feature importance-----------------------------------
             col1, col12 = st.columns(2)
             with col1:
                 st.markdown("##### ✅ Priority actions – highly modifiable factors")
@@ -961,17 +963,18 @@ with col_left:
                 else:
                     st.info("No moderately modifiable factors currently increasing risk.")
 
-
+            # plotting
             with st.spinner("Visualizing all important factors..."):
                 st.pyplot(fig, transparent=True, width='stretch')
             # end importance plot
 
+## Shap explanaition---------------------------------------------
             with st.expander("SHAP Values Explained"):
                 st.write("""
 SHAP values show how much each health factor (age, smoking, etc.) pushed the prediction higher or lower from the average baseline risk. Positive values increase heart disease risk, while negative values decrease it. All values add up to give the final prediction, explaining exactly why the model arrived at that specific percentage.
                          [→ Learn more about SHAP](https://shap.readthedocs.io/en/latest/index.html)
                          """)
-
+# AI assistant button ------------------------------------------
             st.write("Head to the AI Assistant for personalized advice based on your profile.")              
             if st.button("Go to AI Assistant →", key="cta4"):
                 st.switch_page("pages/AIAssistance.py")
