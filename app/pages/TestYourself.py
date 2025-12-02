@@ -447,7 +447,12 @@ Save a copy of your risk assessment and personalized recommendations for your re
                     value=st.session_state.get("alc_value"),
                     key = "input_alc"
                 )
-                alc_value = float(alc_value)
+                # Ensure it's always a float (prevents crash)
+                try:
+                    alc_value = float(alc_value)
+                except:
+                    alc_value = 0.0   # fallback to 0 if any error
+
 
                 st.write("**On how many days in the last 30 days:**")
                 # Excercise
