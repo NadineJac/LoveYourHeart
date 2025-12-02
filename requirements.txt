@@ -8,6 +8,7 @@ ydata_profiling
 groq
 streamlit
 plotly
+reportlab
 streamlit_scroll_to_top
 llama-index-core
 llama-index-llms-groq
