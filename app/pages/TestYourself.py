@@ -10,6 +10,10 @@ from streamlit_scroll_to_top import scroll_to_here
 import numpy as np
 import shap
 import matplotlib.pyplot as plt
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import letter
+from io import BytesIO
 #----------------------------------------------------------------------------
 ### Define functions
 
@@ -86,6 +90,40 @@ def bootstrap_confidence_interval_single_row(model, user_df, n_bootstrap=300):
     upper = np.percentile(preds, 97.5)
 
     return lower, upper
+
+# PDF Report
+def create_pdf_report(user_df, risk_value, ci_low, ci_high, what_if_df=None):
+    buffer = BytesIO()
+
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+    story = []
+
+    title = Paragraph("<b>Heart Risk Assessment Report</b>", styles["Title"])
+    story.append(title)
+    story.append(Spacer(1, 12))
+
+    story.append(Paragraph("<b>User Input Data:</b>", styles["Heading2"]))
+    for col, val in user_df.iloc[0].items():
+        story.append(Paragraph(f"{col}: {val}", styles["Normal"]))
+    story.append(Spacer(1, 12))
+
+    story.append(Paragraph("<b>Risk Prediction:</b>", styles["Heading2"]))
+    story.append(Paragraph(f"Predicted Heart Risk: {risk_value}%", styles["Normal"]))
+    story.append(Paragraph(f"95% Confidence Interval: {ci_low:.1f}% – {ci_high:.1f}%", styles["Normal"]))
+    story.append(Spacer(1, 12))
+
+    if what_if_df is not None:
+        story.append(Paragraph("<b>What-If Scenario Results:</b>", styles["Heading2"]))
+        for col, val in what_if_df.iloc[0].items():
+            story.append(Paragraph(f"{col}: {val}", styles["Normal"]))
+        story.append(Spacer(1, 12))
+
+    doc.build(story)
+
+    buffer.seek(0)
+    return buffer
+
 # Changed fetures for 'What-If"-Scenario
 def display_changes_compact(user, user2):
     """
@@ -990,6 +1028,22 @@ Save a copy of your risk assessment and personalized recommendations for your re
 SHAP values show how much each health factor (age, smoking, etc.) pushed the prediction higher or lower from the average baseline risk. Positive values increase heart disease risk, while negative values decrease it. All values add up to give the final prediction, explaining exactly why the model arrived at that specific percentage.
                          [→ Learn more about SHAP](https://shap.readthedocs.io/en/latest/index.html)
                          """)
+# PDF Report dowload button ------------------------------------
+            # Generate PDF
+            pdf_buffer = create_pdf_report(
+                user_df=st.session_state["user_data"],
+                risk_value=st.session_state["risk_value"],
+                ci_low=lower_ci,
+                ci_high=upper_ci,
+                what_if_df=None  # or pass your what-if DataFrame
+            )
+            
+            st.download_button(
+                label="📄 Download Heart Risk Report (PDF)",
+                data=pdf_buffer,
+                file_name="heart_risk_report.pdf",
+                mime="application/pdf"
+            )
 # AI assistant button ------------------------------------------
             st.write("Head to the AI Assistant for personalized advice based on your profile.")              
             if st.button("Go to AI Assistant →", key="cta4"):
