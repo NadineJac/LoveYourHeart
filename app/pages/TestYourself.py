@@ -91,6 +91,97 @@ def bootstrap_confidence_interval_single_row(model, user_df, n_bootstrap=300):
 
     return lower, upper
 
+# Create PDF Report
+def create_pdf_report(user_df, risk_value, ci_low, ci_high, what_if_df=None, what_if_risk=None):
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=60, bottomMargin=40)
+    
+    # Styles
+    styles = getSampleStyleSheet()
+    heading_style = ParagraphStyle(
+        'Heading',
+        parent=styles['Heading1'],
+        fontSize=20,
+        textColor=colors.HexColor("#FFCDD2"),      # Light pink text
+        backColor=colors.HexColor("#C21807"),      # Dark red background
+        alignment=TA_CENTER,                        # Center align
+        spaceAfter=20,
+        leading=24,                                 # line height
+        fontName='Helvetica-Bold'
+        )
+    sub_heading_style = ParagraphStyle(
+        'SubHeading',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor=colors.HexColor("#FF4081"),  # Pinkish for subheadings
+        spaceAfter=8
+    )
+    normal_style = styles['Normal']
+    normal_style.fontSize = 11
+    
+    story = []
+
+    # Title
+    story.append(Paragraph("Love Your Heart - Heart Risk Report", heading_style))
+    story.append(Spacer(1, 12))
+
+    # Original user data
+    story.append(Paragraph("🩺 Original Data", sub_heading_style))
+    
+    # Build a table for better presentation
+    original_data = [["Parameter", "Value"]]
+    for col, val in user_df.loc[0].items():
+        original_data.append([col, str(val)])
+    original_data.append(["Predicted Risk (%)", f"{risk_value:.2f}%"])
+    original_data.append(["Confidence Interval (%)", f"{ci_low:.2f}% - {ci_high:.2f}%"])
+
+    table = Table(original_data, hAlign='LEFT', colWidths=[180, 180])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#FFCDD2")),  # light red header
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+        ('BACKGROUND', (0,1), (-1,-1), colors.whitesmoke),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+
+        # Highlight last row, second column (Predicted Risk)
+        ('BACKGROUND', (1,-2), (1,-2), colors.HexColor("#FFCDD2")),   # light pink background
+        ('TEXTCOLOR', (1,-2), (1,-2), colors.HexColor("#C21807")),     # dark red text
+        ('FONTNAME', (1,-2), (1,-2), 'Helvetica-Bold')
+    ]))
+    story.append(table)
+    story.append(Spacer(1, 20))
+
+    # What-If scenario (only if available)
+    if what_if_df is not None:
+        story.append(Paragraph("What-If Scenario", sub_heading_style))
+        
+        what_if_data = [["Parameter", "Value"]]
+        for col, val in what_if_df.loc[0].items():
+            what_if_data.append([col, str(val)])
+        if what_if_risk is not None:
+            what_if_data.append(["Predicted Risk (%)", f"{what_if_risk:.2f}%"])
+            what_if_data.append(["Confidence Interval (%)", f"{lower_ci2:.1f}% – {upper_ci2:.1f}%"])
+        
+        table2 = Table(what_if_data, hAlign='LEFT', colWidths=[180, 180])
+        table2.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#F8BBD0")),  # pink header
+            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+            ('BACKGROUND', (0,1), (-1,-1), colors.whitesmoke),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+
+            # Highlight last row, second column (Predicted Risk)
+            ('BACKGROUND', (1,-2), (1,-2), colors.HexColor("#FFCDD2")),   # light pink background
+            ('TEXTCOLOR', (1,-2), (1,-2), colors.HexColor("#C21807")),     # dark red text
+            ('FONTNAME', (1,-2), (1,-2), 'Helvetica-Bold')
+        ]))
+        story.append(table2)
+        story.append(Spacer(1, 20))
+
+    doc.build(story)
+    buffer.seek(0)
+    return buffer
+
 # Changed fetures for 'What-If"-Scenario
 def display_changes_compact(user, user2):
     """
@@ -417,7 +508,7 @@ with col_left:
                     "How many alcoholic drinks do you drink per week?", 
                     min_value=0, 
                     max_value=99, 
-                    value=st.session_state.get("alc_value"),
+                    value=int(st.session_state.get("alc_value",0)),
                     key = "input_alc"
                 )
 
@@ -652,7 +743,7 @@ with col_left:
                         "How many alcoholic drinks do you drink per week?", 
                         min_value=0, 
                         max_value=99, 
-                        value=st.session_state.get("alc_value"),
+                        value=int(st.session_state.get("alc_value",0)),
                         key = "alc_input_whatif"
                     )
 
@@ -1001,6 +1092,39 @@ with col_left:
 SHAP values show how much each health factor (age, smoking, etc.) pushed the prediction higher or lower from the average baseline risk. Positive values increase heart disease risk, while negative values decrease it. All values add up to give the final prediction, explaining exactly why the model arrived at that specific percentage.
                          [→ Learn more about SHAP](https://shap.readthedocs.io/en/latest/index.html)
                          """)
+
+# PDF Report dowload button ------------------------------------
+           # Prepare the what-if data only if exists
+            what_if_df = st.session_state.get("user_data2", None)
+            what_if_risk = st.session_state.get("risk_value2", None)
+
+            # Generate PDF
+            pdf_buffer = create_pdf_report(
+                user_df=st.session_state["user_data"],
+                risk_value=st.session_state["risk_value"],
+                ci_low=lower_ci,
+                ci_high=upper_ci,
+                what_if_df=what_if_df,
+                what_if_risk=what_if_risk
+            )
+
+            # Red download button
+            st.markdown("""
+            <style>
+            div.stDownloadButton > button:first-child {
+                background-color: '#f43f5e' 
+                color: white;
+                font-weight: bold;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+
+            st.download_button(
+                label="📄 Download Heart Risk Report (PDF)",
+                data=pdf_buffer,
+                file_name="heart_risk_report.pdf",
+                mime="application/pdf"
+            )
 
 # AI assistant button ------------------------------------------
             st.write("Head to the AI Assistant for personalized advice based on your profile.")              
