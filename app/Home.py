@@ -157,7 +157,7 @@ with main_col:
         
         st.write("")
         if st.button("Start Assessment →", type="primary", key="cta1"):
-            st.switch_page("pages/TestYourself.py")
+            st.switch_page("pages/01_Assess_your_Risk.py")
   
     # Step 2 - AI Assistant
     st.markdown('<div class="step-container">', unsafe_allow_html=True)
