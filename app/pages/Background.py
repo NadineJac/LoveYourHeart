@@ -2,7 +2,7 @@ import streamlit as st
 st.set_page_config(page_title="Background", page_icon="❤️", layout="wide")
 
 with st.container():
-    col_left, col_right = st.columns([2, 1], gap="large")
+    col_left, col_right, col_unused = st.columns([3, 1,1], gap="large")
 
     with col_left:
         st.markdown("""
@@ -35,7 +35,7 @@ with st.container():
             border=True
         )
 with st.container():
-    col_left, col_right = st.columns([2, 1], gap="large")
+    col_left, col_right, col_unused = st.columns([3, 1,1], gap="large")
     with col_left:
         st.markdown("""
     #### The Numbers Behind Heart Attacks
@@ -114,7 +114,7 @@ with st.container():
         ax.set_axisbelow(True)
 
         plt.tight_layout()
-        st.pyplot(fig, transparent=True, use_container_width=True)
+        st.pyplot(fig, transparent=True, width='stretch')
     with col_right:
         st.metric(
             label="US Heart Attack Rate",
@@ -125,7 +125,7 @@ with st.container():
         )
 
 with st.container():
-    col_left, col_right = st.columns([2, 1], gap="large")
+    col_left, col_right, col_unused = st.columns([3, 1,1], gap="large")
     with col_left:
         st.markdown("""
 
@@ -164,7 +164,7 @@ with st.container():
             border=True
         )
 with st.container():
-    col_left, col_right = st.columns([2, 1], gap="large")
+    col_left, col_right, col_unused = st.columns([3, 1,1], gap="large")
     with col_left:
         st.markdown("""
 
