@@ -115,7 +115,7 @@ def create_pdf_report(user_df, risk_value, ci_low, ci_high, what_if_df=None, wha
         'SubHeading',
         parent=styles['Heading2'],
         fontSize=14,
-        textColor=colors.HexColor("#FF4081"),  # Pinkish for subheadings
+        textColor=colors.HexColor("#C21807"),  # Pinkish for subheadings
         spaceAfter=8
     )
     normal_style = styles['Normal']
@@ -139,7 +139,7 @@ def create_pdf_report(user_df, risk_value, ci_low, ci_high, what_if_df=None, wha
 
     table = Table(original_data, hAlign='LEFT', colWidths=[180, 180])
     table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#F8BBD0")),  # light red header
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#C21807")),  # light red header
         ('TEXTCOLOR', (0,0), (-1,0), colors.white),
         ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
         ('BACKGROUND', (0,1), (-1,-1), colors.whitesmoke),
@@ -166,7 +166,7 @@ def create_pdf_report(user_df, risk_value, ci_low, ci_high, what_if_df=None, wha
         
         table2 = Table(what_if_data, hAlign='LEFT', colWidths=[180, 180])
         table2.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#F8BBD0")),  # pink header
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#C21807")),  # pink header
             ('TEXTCOLOR', (0,0), (-1,0), colors.white),
             ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
             ('BACKGROUND', (0,1), (-1,-1), colors.whitesmoke),
