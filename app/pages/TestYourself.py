@@ -1113,8 +1113,8 @@ SHAP values show how much each health factor (age, smoking, etc.) pushed the pre
             # Red download button
             st.markdown("""
             <style>
-            div.stDownloadButton > button:first-child {
-                background-color: '#f43f5e' 
+            div.stDownloadButton > button {
+                background-color: #f43f5e 
                 color: white;
                 font-weight: bold;
             }
