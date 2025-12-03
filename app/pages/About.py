@@ -1,7 +1,7 @@
 import streamlit as st
 
 # Page config
-st.set_page_config(page_title="Background", page_icon="❤️", layout="wide")
+st.set_page_config(page_title="About", page_icon="❤️", layout="wide")
 
 # Custom CSS for modern look
 st.markdown("""
@@ -29,7 +29,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Hero section
-st.markdown('<h1 class="big-title">❤️ Project Background</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="big-title">❤️ About the Project</h1>', unsafe_allow_html=True)
 st.markdown('<p class="subtitle">Understand the motivation, objectives, and scope of the "Love Your Heart" app.</p>', unsafe_allow_html=True)
 
 # Main content in two columns
@@ -83,32 +83,32 @@ By using BRFSS data, we're able to identify patterns and risk factors that have 
     st.write("""Developed by [Haripriya Raghunathan](https://www.linkedin.com/in/haripriya-raghunathan-a237732a9/) and [Nadine Jacobsen](https://www.linkedin.com/in/nadine-jacobsen/) as part of the WBS Data Science Bootcamp final project.
     \n For more details, visit the [GitHub repository](https://github.com/NadineJac/LoveYourHeart/tree/main)""")
 
-with col_right:
-    st.markdown("#### Why Use This Tool?")
-    st.markdown("""
-    <div class="feature-box">
-        <strong>📊 Data-Driven Insights</strong><br>
-        Leverages machine learning models trained on reliable datasets to provide personalized recommendations.
-    </div>
-    """, unsafe_allow_html=True)
+# with col_right:
+#     st.markdown("#### Why Use This Tool?")
+#     st.markdown("""
+#     <div class="feature-box">
+#         <strong>📊 Data-Driven Insights</strong><br>
+#         Leverages machine learning models trained on reliable datasets to provide personalized recommendations.
+#     </div>
+#     """, unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="feature-box">
-        <strong>💡 Personalized Guidance</strong><br>
-        AI-powered chatbot answers questions and provides actionable lifestyle tips tailored to each user.
-    </div>
-    """, unsafe_allow_html=True)
+#     st.markdown("""
+#     <div class="feature-box">
+#         <strong>💡 Personalized Guidance</strong><br>
+#         AI-powered chatbot answers questions and provides actionable lifestyle tips tailored to each user.
+#     </div>
+#     """, unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="feature-box">
-        <strong>⚡ Easy & Interactive</strong><br>
-        Streamlit interface allows quick input and instant results with intuitive design.
-    </div>
-    """, unsafe_allow_html=True)
+#     st.markdown("""
+#     <div class="feature-box">
+#         <strong>⚡ Easy & Interactive</strong><br>
+#         Streamlit interface allows quick input and instant results with intuitive design.
+#     </div>
+#     """, unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="feature-box">
-        <strong>🔒 Privacy First</strong><br>
-        All user-provided information stays on the device; no cloud storage of personal data.
-    </div>
-    """, unsafe_allow_html=True)
+#     st.markdown("""
+#     <div class="feature-box">
+#         <strong>🔒 Privacy First</strong><br>
+#         All user-provided information stays on the device; no cloud storage of personal data.
+#     </div>
+#     """, unsafe_allow_html=True)
