@@ -204,8 +204,8 @@ with sidebar_col:
     </div>
     ''', unsafe_allow_html=True)
     
-    if st.button("Learn more about the project →", key="cta3"):
-        st.switch_page("pages/Background.py")
+    if st.button("Learn more about the project →",type="primary", key="cta3"):
+        st.switch_page("pages/About.py")
 
 st.write("")
 st.divider()
