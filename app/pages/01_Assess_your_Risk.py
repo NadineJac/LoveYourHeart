@@ -1131,7 +1131,7 @@ SHAP values show how much each health factor (age, smoking, etc.) pushed the pre
 # AI assistant button ------------------------------------------
             st.write("Head to the AI Assistant for personalized advice based on your profile.")              
             if st.button("Go to AI Assistant →", key="cta4"):
-                st.switch_page("pages/AIAssistance.py")
+                st.switch_page("pages/02_AI_Assistance.py")
 
 
 

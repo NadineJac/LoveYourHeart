@@ -117,7 +117,7 @@ with col_middle:
     st.write("")
     st.write("")
     if st.button("Learn more about heart disease →", type="primary", key="learn_more_top", width="stretch"):
-        st.switch_page("pages/Background.py")
+        st.switch_page("pages/03_Background.py")
 
 with col_right:
     st.markdown('''
@@ -169,7 +169,7 @@ with main_col:
         st.write("Get personalized answers about your results, heart health strategies, and lifestyle modifications tailored to your profile.")
         st.write("")
         if st.button("Go to AI Assistant →", type="primary", key="cta2"):
-            st.switch_page("pages/AIAssistance.py")
+            st.switch_page("pages/02_AI_Assistance.py")
     st.markdown('</div>', unsafe_allow_html=True)
 
 with sidebar_col:
@@ -205,7 +205,7 @@ with sidebar_col:
     ''', unsafe_allow_html=True)
     
     if st.button("Learn more about the project →",type="primary", key="cta3"):
-        st.switch_page("pages/About.py")
+        st.switch_page("pages/04_About_the_Project.py")
 
 st.write("")
 st.divider()
