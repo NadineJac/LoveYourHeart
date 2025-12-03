@@ -1,8 +1,27 @@
 import streamlit as st
+st.markdown("""
+    <style>
+    .feature-box {
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #f43f5e;
+        margin-bottom: 1rem;
+    }
+    .metrics-box {
+        padding: 1.5rem;
+        background: #f8f9fa;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #f43f5e;
+        border-right: 4px solid #f43f5e;
+    }
+    </style>
+""", unsafe_allow_html=True)
 st.set_page_config(page_title="Background", page_icon="❤️", layout="wide")
 
 with st.container():
-    col_left, col_right, col_unused = st.columns([3, 1,1], gap="large")
+    col_left, col_right = st.columns([3, 2], gap="large")
 
     with col_left:
         st.markdown("""
@@ -14,31 +33,35 @@ with st.container():
     ### The Impact of Cardiovascular Disease
 
     #### A Global Health Priority
+                    """)
+    
+with st.container():
+    col_left, col_right = st.columns([3, 2], gap="large")
 
+    with col_left:
+         st.markdown("""
     Cardiovascular diseases claim one life every 34 seconds in the United States, accounting for 919,032 deaths in 2023 [[1]](https://www.cdc.gov/heart-disease/data-research/facts-stats/index.html). Globally, 10,000 people die from cardiovascular diseases every day in the WHO European Region [[2]](https://www.who.int/europe/news-room/15-05-2024-cardiovascular-diseases-kill-10-000-people-in-the-who-european-region-every-day--with-men-dying-more-frequently-than-women), representing over 42% of all deaths. In Germany specifically, cardiovascular disease has been the primary cause of death for decades, responsible for a significant portion of mortality and healthcare costs.
 
     Beyond the tragic loss of life, cardiovascular diseases place an enormous burden on healthcare systems and families. The economic impact extends beyond direct medical costs to include lost productivity, disability, and reduced quality of life for millions of individuals and their loved ones.
 
 
     ### Heart Attacks: A Critical Subset of Cardiovascular Disease
-
-    #### What Is a Heart Attack?
-
-    A heart attack, medically known as acute myocardial infarction, occurs when blood flow to part of the heart muscle becomes blocked, usually by a blood clot. This blockage prevents oxygen-rich blood from reaching heart tissue, causing damage or death to that portion of the heart muscle. Heart attacks are a subset of the broader category of cardiovascular diseases, which also includes stroke, heart failure, and other conditions affecting the heart and blood vessels.
-""")
+                     """)
+         st.info("""#### What Is a Heart Attack?\n\nA heart attack, medically known as acute myocardial infarction, occurs when blood flow to part of the heart muscle becomes blocked, usually by a blood clot. This blockage prevents oxygen-rich blood from reaching heart tissue, causing damage or death to that portion of the heart muscle. Heart attacks are a subset of the broader category of cardiovascular diseases, which also includes stroke, heart failure, and other conditions affecting the heart and blood vessels.
+            """)
+         st.markdown("#### The Numbers Behind Heart Attacks")
     with col_right:
-        st.metric(
-            label="Global Impact",
-            value="10,000",
-            delta="deaths/day (WHO Europe)",
-            delta_color="off",
-            border=True
-        )
+        st.markdown('''
+        <div class="metrics-box">
+            <strong>🌍 Global Impact</strong><br>
+            10,000 deaths/day from heart disease (WHO Europe)
+        </div>
+        ''', unsafe_allow_html=True)
 with st.container():
-    col_left, col_right, col_unused = st.columns([3, 1,1], gap="large")
+    col_left, col_right = st.columns([3, 2], gap="large")
     with col_left:
         st.markdown("""
-    #### The Numbers Behind Heart Attacks
+
 
     **United States:**
     Approximately 805,000 Americans experience a heart attack each year[[3]](https://www.cdc.gov/heart-disease/data-research/facts-stats/index.html), with someone having a heart attack every 40 seconds. Of these, about 605,000 are experiencing their first heart attack, while 200,000 occur in people who have already had one. Notably, about one in five heart attacks are "silent"—the damage occurs, but the person isn't aware of it.
@@ -115,23 +138,28 @@ with st.container():
 
         plt.tight_layout()
         st.pyplot(fig, transparent=True, width='stretch')
-    with col_right:
-        st.metric(
-            label="US Heart Attack Rate",
-            value="Every 40 sec",
-            delta="1 Heart Attack in the USA",
-                    delta_color="off",
-            border=True
-        )
 
-with st.container():
-    col_left, col_right, col_unused = st.columns([3, 1,1], gap="large")
-    with col_left:
         st.markdown("""
 
     ## The Power of Prevention: Modifiable Risk Factors
 
     #### You Have More Control Than You Think
+
+                    """)
+
+    with col_right:
+                    st.markdown('''
+        <div class="metrics-box">
+            <strong>⌛ Too often</strong><br>
+            Every 40 seconds a heart attack occurs in the USA.
+        </div>
+        ''', unsafe_allow_html=True)
+
+
+with st.container():
+    col_left, col_right = st.columns([3, 2], gap="large")
+    with col_left:
+        st.markdown("""
 
     Here's the truly empowering fact: research shows that strict control of five key modifiable risk factors could potentially prevent 57.2% of all cardiovascular disease cases in women and 52.6% in men globally[[6]](https://www.nejm.org/doi/full/10.1056/NEJMoa2206916). Another comprehensive study found that a large proportion of cardiovascular disease and premature deaths could be averted by targeting just a few modifiable risk factors [[7]](https://pmc.ncbi.nlm.nih.gov/articles/PMC8006904/).
 
@@ -154,21 +182,22 @@ with st.container():
     - **Excessive Alcohol Consumption:** Drinking too much can raise blood pressure and increase heart disease risk.
 
     Up to 90% of heart disease is considered preventable with lifestyle changes and a proactive approach to prevention. Research consistently shows that maintaining good health through a nutrient-rich diet, managed weight, physical activity, and avoiding harmful habits like smoking can dramatically reduce your risk.
-""")        
+
+    ### Take Action Today                
+                    """)        
     with col_right:
-        st.metric(
-            label="Preventable",
-            value="Up to 90%",
-            delta="of heart disease can be prevented",
-            delta_color="off",
-            border=True
-        )
+        st.markdown('''
+        <div class="metrics-box">
+            <strong>✅ Preventable</strong><br>
+            Up to 90% of heart disease can be prevented.
+        </div>
+        ''', unsafe_allow_html=True)
+
 with st.container():
-    col_left, col_right, col_unused = st.columns([3, 1,1], gap="large")
+    col_left, col_right= st.columns([3, 2], gap="large")
     with col_left:
         st.markdown("""
 
-    ### Take Action Today
 
     Understanding your risk is the first step toward prevention. The good news is that it's never too late to make positive changes. Whether you're managing existing risk factors or working to prevent new ones from developing, small steps can lead to significant improvements in your heart health.
 
@@ -176,27 +205,24 @@ with st.container():
 
     Your heart health is in your hands—and with the right knowledge and actions, you can significantly reduce your risk of heart attack and enjoy a longer, healthier life.
                 """)
+         # Data Sources section
+        with st.expander("Data Sources"):
 
-        # Data Sources section
-        st.markdown("#### Data Sources")
+            sources = """
+            - **US Statistics**: [CDC Heart Disease Facts and Statistics](https://www.cdc.gov/heart-disease/data-research/facts-stats/index.html) 
+            - **WHO European Region**: [WHO Europe News](https://www.who.int/europe/news-room/15-05-2024-cardiovascular-diseases-kill-10-000-people-in-the-who-european-region-every-day--with-men-dying-more-frequently-than-women)
+            - **European Union Statistics**: [Eurostat - Cardiovascular Diseases Statistics](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Cardiovascular_diseases_statistics)
+            - **Germany CHD Prevalence**: [DEGS1 Study (PMC10161269)](https://pmc.ncbi.nlm.nih.gov/articles/PMC10161269/)
+            - **Germany Mortality Trends**: [German Cardiovascular Disease Trends (PMC12175194)](https://pmc.ncbi.nlm.nih.gov/articles/PMC12175194/)
+            """
+            st.markdown(sources)
 
-        sources = """
-        - **US Statistics**: [CDC Heart Disease Facts and Statistics](https://www.cdc.gov/heart-disease/data-research/facts-stats/index.html) 
-        - **WHO European Region**: [WHO Europe News](https://www.who.int/europe/news-room/15-05-2024-cardiovascular-diseases-kill-10-000-people-in-the-who-european-region-every-day--with-men-dying-more-frequently-than-women)
-        - **European Union Statistics**: [Eurostat - Cardiovascular Diseases Statistics](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Cardiovascular_diseases_statistics)
-        - **Germany CHD Prevalence**: [DEGS1 Study (PMC10161269)](https://pmc.ncbi.nlm.nih.gov/articles/PMC10161269/)
-        - **Germany Mortality Trends**: [German Cardiovascular Disease Trends (PMC12175194)](https://pmc.ncbi.nlm.nih.gov/articles/PMC12175194/)
-        """
 
-        st.markdown(sources)
 
     with col_right:
-        st.metric(
-            label="12-month prevalence",
-            value="6.0% men, 3.7% women",
-            delta="of coronary heart disease in Germany",
-                    delta_color="off",
-            border=True
-        )
-
-
+            st.markdown('''
+        <div class="metrics-box">
+            <strong>⚠️ Too likely</strong><br>
+            The 12-month prevalence of coronary heart disease in Germany is 6.0% for men, 3.7% for women.
+        </div>
+        ''', unsafe_allow_html=True)           
