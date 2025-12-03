@@ -1,30 +1,46 @@
-
 import streamlit as st
 
 # Page config
-st.set_page_config(page_title="Love Your Heart", page_icon="❤️", layout="wide")
+st.set_page_config(page_title="Home", page_icon="❤️", layout="wide")
 
 # Custom CSS for modern look
 st.markdown("""
     <style>
+    .header-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;  /* Add this to center everything */
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
     .big-title {
-        font-size: 3.5rem;
+        font-size: 36;
         font-weight: 700;
-        margin-bottom: 0.5rem;
+        margin: 0;
         line-height: 1.2;
+        /* Remove flex-grow: 1; */
+        text-align: center;
     }
-    .subtitle {
-        font-size: 1.2rem;
-        color: #666;
-        margin-bottom: 0.5rem;
+    .tagline {
+        font-size: 2rem; 
+        color: #444;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-weight: 500;
     }
-            .stats-container {
-    display: flex;
-    gap: 2rem;
-    justify-content: space-between;
-    margin-top: 1.5rem;
+    .intro-text {
+        font-size: 2rem; 
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        text-align: center;  
     }
-
+    .stats-container {
+        display: flex;
+        gap: 2rem;
+        justify-content: space-between;
+        margin-top: 1.5rem;
+    }
     .step-number {
         display: inline-block;
         width: 40px;
@@ -38,7 +54,7 @@ st.markdown("""
         margin-right: 1rem;
     }
     .step-container {
-        margin-bottom: 2rem;
+        margin-bottom: 1rem;
     }
     .feature-box {
         padding: 1.5rem;
@@ -49,7 +65,7 @@ st.markdown("""
     }
     .metrics-box {
         padding: 1.5rem;
-        background: #f8f9fa;;
+        background: #f8f9fa;
         margin-bottom: 1rem;
         border-radius: 8px;
         border-left: 4px solid #f43f5e;
@@ -58,47 +74,59 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Hero section - asymmetric layout
-col_left, col_middle, col_right = st.columns([3, 3, 4], gap="large")
+# Hero section - full width header
+st.markdown("#")
+st.markdown("#")
+st.markdown("""
+    <div class="header-container">
+        <h1 class="big-title">❤️ Love Your Heart</h1>
+    </div>
+""", unsafe_allow_html=True)
+
+st.markdown('<p class="tagline">Understand your heart health and reduce it with AI-powered insights</p>', unsafe_allow_html=True)
+st.write("")
+
+# Intro paragraph
+st.markdown("""
+    <p class="intro-text">
+    Heart disease remains the leading cause of death globally, yet up to 90% of cases are preventable through lifestyle changes. 
+    Understanding your personal risk factors is the first step toward a healthier heart. Our AI-powered tool provides you with 
+    a personalized cardiovascular risk assessment and actionable guidance—empowering you to take control of your heart health today.
+    </p>
+""", unsafe_allow_html=True)
+st.write("")
+
+# Stats section
+col_left, col_middle, col_right = st.columns([1, 1, 1], gap="large")
 
 with col_left:
-    st.markdown('<h1 class="big-title">❤️ Love Your Heart</h1>', unsafe_allow_html=True)
-    st.markdown(
-        '<p class="subtitle">AI-powered insights for better cardiovascular health</p>',
-        unsafe_allow_html=True
-    )
-    st.write("")
-with col_middle:
     st.markdown('''
     <div class="metrics-box">
-        <strong>🌍 Global Impact: 10,000</strong><br>
-        deaths/day (WHO Europe)
+        <strong>🌍 Global Impact</strong><br>
+        10,000 deaths/day from heart disease (WHO Europe)
     </div>
     ''', unsafe_allow_html=True)
         
+with col_middle:
     st.markdown('''
     <div class="metrics-box">
-        <strong>✅ Preventable: Up to 90%</strong><br>
-        of heart disease can be prevented
+        <strong>✅ Preventable</strong><br>
+        Up to 90% of heart disease can be prevented
     </div>
     ''', unsafe_allow_html=True)
 
 with col_right:
     st.markdown('''
-    <div class="feature-box">
-        <strong>💡 Understand Your Risk</strong><br>
-        Quick cardiovascular risk assessment based on your lifestyle and health.
-    </div>
-    ''', unsafe_allow_html=True)
-    st.markdown('''
-    <div class="feature-box">
-        <strong>📖 Evidence-Based Guidance</strong><br>
-        Answers from AI trained on medical literature, personalized to your profile.
+    <div class="metrics-box">
+        <strong>💪 Take Action</strong><br>
+        Know your risk, change your future
     </div>
     ''', unsafe_allow_html=True)
 
 st.write("")
+st.write("")
 st.divider()
+st.write("")
 st.write("")
 
 # Main content area
@@ -107,41 +135,38 @@ main_col, sidebar_col = st.columns([3, 2], gap="large")
 with main_col:
     st.markdown("#### How It Works")
 
-    # Step 1
+    # Step 1 - Assessment with expanded features
     st.markdown('<div class="step-container">', unsafe_allow_html=True)
     col1, col2 = st.columns([0.1, 0.9])
     with col1:
         st.markdown('<span class="step-number">1</span>', unsafe_allow_html=True)
     with col2:
-        st.markdown("##### Complete Your Profile")
-        st.write("Share basic health information including age, BMI, diabetes status, and lifestyle factors. Takes about 2 minutes.")
+        st.markdown("##### Get Your Personalized Risk Assessment")
+        st.write("""
+                 Enter your health and lifestyle information to receive an instant cardiovascular risk score.
+            * **Visual Risk Score:** See your risk displayed as an easy-to-read gauge (Low, Moderate, or High)
+            * **Understand Key Factors:** Discover which modifiable factors (smoking, exercise, diet, weight) 
+            have the greatest impact on your heart health
+            * **What-If Scenarios:** Explore how lifestyle changes could improve your risk score in real-time
+            * **Download Results:** Save your assessment and recommendations to share with your healthcare provider
+                 """)
+        
+        st.write("")
         if st.button("Start Assessment →", type="primary", key="cta1"):
             st.switch_page("pages/TestYourself.py")
-    # st.markdown('</div>', unsafe_allow_html=True)
-
-    
-    # Step 2
+  
+    # Step 2 - AI Assistant
     st.markdown('<div class="step-container">', unsafe_allow_html=True)
     col1, col2 = st.columns([0.1, 0.9])
     with col1:
         st.markdown('<span class="step-number">2</span>', unsafe_allow_html=True)
     with col2:
-        st.markdown("##### Review Your Metrics")
-        st.write("See your calculated health metrics and cardiovascular risk profile based on clinical guidelines.")
-    #st.markdown('</div>', unsafe_allow_html=True)
-
-    
-    # Step 3
-    st.markdown('<div class="step-container">', unsafe_allow_html=True)
-    col1, col2 = st.columns([0.1, 0.9])
-    with col1:
-        st.markdown('<span class="step-number">3</span>', unsafe_allow_html=True)
-    with col2:
-        st.markdown("##### Chat with AI Assistant")
-        st.write("Ask questions about your results, heart health, and lifestyle changes tailored to your profile.")
-        if st.button("Go to AI Assistant →", key="cta2"):
+        st.markdown("##### Chat with Your AI Health Assistant")
+        st.write("Get personalized answers about your results, heart health strategies, and lifestyle modifications tailored to your profile.")
+        st.write("")
+        if st.button("Go to AI Assistant →", type="primary", key="cta2"):
             st.switch_page("pages/AIAssistance.py")
-    #st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with sidebar_col:
     st.markdown("#### Why Use This Tool?")
@@ -174,10 +199,9 @@ with sidebar_col:
         Receive clear, achievable steps to improve your heart health.
     </div>
     ''', unsafe_allow_html=True)
-    if st.button("Learn more about the project →", type="primary", key="cta3"):
+    
+    if st.button("Learn more about the project →", key="cta3"):
         st.switch_page("pages/Background.py")
-
-
 
 st.write("")
 st.divider()
@@ -186,9 +210,8 @@ st.divider()
 st.info("""
 **Medical Disclaimer:** This tool provides educational information only and is not a substitute for professional medical advice. 
 Always consult your healthcare provider for medical decisions. If you experience cardiac symptoms, seek immediate medical attention.
-The AI assistant provides general guidance based on medical literature but cannot diagnose conditions or prescribe treatments
+The AI assistant provides general guidance based on medical literature but cannot diagnose conditions or prescribe treatments.
 """)
-
 
 # Footer
 col1, col2 = st.columns([3, 1])
