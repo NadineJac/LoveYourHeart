@@ -316,20 +316,26 @@ if "profile_submitted" not in st.session_state:
 #####
 col_left, col_right = st.columns([1, 2], gap="large")
 with col_left:
-    st.markdown("""
-##### 1. Enter Your Health Information
-Provide details about your lifestyle and health factors such as age, BMI, smoking status, physical activity, and medical history. These are the inputs our machine learning model uses to estimate your heart disease risk.
-##### 2. Get Your Personalized Risk Score
-Once you submit your information, the app instantly calculates your risk level and displays it as an easy-to-read gauge (Low, Moderate, or High risk).
-##### 3. Understand What Matters Most
-Our model highlights which factors have the greatest impact on your risk score—these are called modifiable factors: lifestyle behaviors and health conditions you can actively change, such as smoking, physical activity, diet, and weight management.
-##### 4. Explore "What-If" Scenarios
-Curious how quitting smoking or increasing exercise could affect your risk? Use the interactive tool to adjust specific factors and see how your risk score changes in real-time.
-##### 5. Download Your Results
-Save a copy of your risk assessment and personalized recommendations for your records or to share with your healthcare provider.
-            """)
+    with st.expander("How it works", expanded=True):
+        st.markdown("""
+    1. **Enter Your Health Information:** Provide details about your lifestyle and health factors such as age, BMI, smoking status, physical activity, and medical history. These are the inputs our machine learning model uses to estimate your heart disease risk.
+    2. **Get Your Personalized Risk Score:** Once you submit your information, the app instantly calculates your risk level and displays it as an easy-to-read gauge (Low, Moderate, or High risk).
+    3. **Understand What Matters Most:** Our model highlights which factors have the greatest impact on your risk score—these are called modifiable factors: lifestyle behaviors and health conditions you can actively change, such as smoking, physical activity, diet, and weight management.
+    4. **Explore "What-If" Scenarios:** Curious how quitting smoking or increasing exercise could affect your risk? Use the interactive tool to adjust specific factors and see how your risk score changes in real-time.
+    5. **Download Your Results:** Save a copy of your risk assessment and personalized recommendations for your records or to share with your healthcare provider.
+                """)
+        st.write("")
 
     tab1, tab2,  = st.tabs(["Your Data", "What if?"])
+    css = '''
+<style>
+    .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+    font-size:1.1rem;    
+    }
+</style>
+'''
+
+    st.markdown(css, unsafe_allow_html=True)
 #---------------------------------------------------------------------------
 ### User Data
     with tab1:      
