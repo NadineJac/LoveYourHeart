@@ -180,6 +180,20 @@ def create_pdf_report(user_df, risk_value, ci_low, ci_high, what_if_df=None, wha
         story.append(table2)
         story.append(Spacer(1, 20))
 
+    # -----------------------------------------------------
+    # AI Initial Recommendation Section
+    # -----------------------------------------------------
+    story.append(Paragraph("Initial Recommendation", sub_heading_style))
+    story.append(Spacer(1, 10))
+
+    ai_reco = st.session_state.get("initial_recommendation", "No recommendation available.")
+
+    # Replace line breaks with HTML <br/> so PDF formats correctly
+    ai_reco = ai_reco.replace("\n", "<br/>")
+
+    story.append(Paragraph(ai_reco, normal_style))
+    story.append(Spacer(1, 20))
+
     doc.build(story)
     buffer.seek(0)
     return buffer
