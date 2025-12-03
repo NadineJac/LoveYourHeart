@@ -91,7 +91,7 @@ st.markdown("""
     <p class="intro-text">
     Heart disease remains the leading cause of death globally, yet up to 90% of cases are preventable through lifestyle changes. 
     Understanding your personal risk factors is the first step toward a healthier heart. Our AI-powered tool provides you with 
-    a personalized cardiovascular risk assessment and actionable guidance—empowering you to take control of your heart health today.
+    a personalized cardiovascular risk assessment and actionable guidance — empowering you to take control of your heart health today.
     </p>
 """, unsafe_allow_html=True)
 st.write("")
@@ -114,6 +114,10 @@ with col_middle:
         Up to 90% of heart disease can be prevented
     </div>
     ''', unsafe_allow_html=True)
+    st.write("")
+    st.write("")
+    if st.button("Learn more about heart disease →", type="primary", key="learn_more_top", width="stretch"):
+        st.switch_page("pages/Background.py")
 
 with col_right:
     st.markdown('''
