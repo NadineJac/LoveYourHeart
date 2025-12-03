@@ -104,8 +104,8 @@ def create_pdf_report(user_df, risk_value, ci_low, ci_high, what_if_df=None, wha
         'Heading',
         parent=styles['Heading1'],
         fontSize=20,
-        textColor=colors.HexColor("#FFCDD2"),      # Light pink text
-        backColor=colors.HexColor("#C21807"),      # Dark red background
+        textColor=colors.HexColor("#C21807"),      # Light pink text
+        #backColor=colors.HexColor("#C21807"),      # Dark red background
         alignment=TA_CENTER,                        # Center align
         spaceAfter=20,
         leading=24,                                 # line height
@@ -128,7 +128,7 @@ def create_pdf_report(user_df, risk_value, ci_low, ci_high, what_if_df=None, wha
     story.append(Spacer(1, 12))
 
     # Original user data
-    story.append(Paragraph("🩺 Original Data", sub_heading_style))
+    story.append(Paragraph("Original Data", sub_heading_style))
     
     # Build a table for better presentation
     original_data = [["Parameter", "Value"]]
@@ -139,7 +139,7 @@ def create_pdf_report(user_df, risk_value, ci_low, ci_high, what_if_df=None, wha
 
     table = Table(original_data, hAlign='LEFT', colWidths=[180, 180])
     table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#FFCDD2")),  # light red header
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#F8BBD0")),  # light red header
         ('TEXTCOLOR', (0,0), (-1,0), colors.white),
         ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
         ('BACKGROUND', (0,1), (-1,-1), colors.whitesmoke),
