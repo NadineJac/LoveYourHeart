@@ -77,7 +77,7 @@ if user_profile:
         profile_text += f"- {k}: {v}\n"
     profile_text += "\nUse this information when answering health-related questions.\n"
 else:
-    profile_text = "No user profile information available yet. Encourage the user to complete their profile in the TestYourself page for personalized advice.\n"
+    profile_text = "No user profile information available yet. Encourage the user to complete their profile in the 'Assess your Risk' page for personalized advice.\n"
 
 # llm
 model = "llama-3.3-70b-versatile"
@@ -210,7 +210,7 @@ if user_profile:
     with st.expander("My recommendation for you:", expanded=True):
         st.markdown(st.session_state.initial_recommendation)
 else:
-    st.info("👈 Complete your profile in the **TestYourself** page for personalized health advice!")
+    st.info("👈 Complete your profile in the **Assess your Risk** page for personalized health advice!")
 
 
 
