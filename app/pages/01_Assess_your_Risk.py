@@ -95,16 +95,6 @@ def bootstrap_confidence_interval_single_row(model, user_df, n_bootstrap=300):
 
 # Create PDF Report
 def create_pdf_report(user_df, risk_value, ci_low, ci_high, what_if_df=None, what_if_risk=None):
-
-    # Ensure the recommendation is in session state
-    if "initial_recommendation" not in st.session_state:
-        # regenerate it if missing
-        answer = st.session_state.rag_bot.chat(
-            "as bullet points with the following headings: healthy habits, Modifiable Risk Factors, Recommendations"
-        )
-        st.session_state.initial_recommendation = answer.response
-
-    ai_reco = st.session_state.get("initial_recommendation", "No recommendation available.")
     
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=60, bottomMargin=40)
