@@ -111,7 +111,7 @@ with col_middle:
     st.markdown('''
     <div class="metrics-box">
         <strong>✅ Preventable</strong><br>
-        Up to 90% of heart disease can be prevented
+        Between 52% and 90% of heart disease risk is within your control.
     </div>
     ''', unsafe_allow_html=True)
     st.write("")
