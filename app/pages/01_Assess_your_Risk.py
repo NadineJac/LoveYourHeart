@@ -16,6 +16,20 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
 from io import BytesIO
+from utils import compute_shap_plot_voting
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline as ImbPipeline
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, VotingClassifier
+from xgboost import XGBClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix
+import shap
+
 #----------------------------------------------------------------------------
 ### Define functions
 
@@ -671,6 +685,27 @@ with col_left:
                         'PhysicalHealth': [physhealth_value] 
                     })
 
+                    user_list = pd.DataFrame([{             
+                        'Sex': [sex_value],
+                        'Age': [age_value],
+                        'Race': [race_cat],
+                        'SleepTime': [sleep_value],
+                        'AgeCategory': [age_cat],
+                        'Smoking': [smoker_value], 
+                        'AlcoholDrinking': [alc_cat],
+                        'BMI': [round(bmi_value,2)],
+                        'Diabetic': [diabetes_value],                
+                        'Stroke': [stroke_value],
+                        'Asthma': [asthma_value],
+                        'KidneyDisease': [kidney_value],
+                        'SkinCancer': [skin_value],
+                        'PhysicalActivity':[excercise_value],
+                        'MentalHealth': [mentalhealth_value],
+                        'DiffWalking': [walk_value],
+                        'GenHealth': [health_cat],
+                        'PhysicalHealth': [physhealth_value] 
+                    }])
+
                     #prediction = model.predict(user)
                     prediction = model.predict_proba(user)[:, 1] #>= 0.5
                     st.session_state["risk_value"] = round(prediction[0]*100,2)  # Store as percentage
@@ -678,6 +713,7 @@ with col_left:
                     st.session_state["just_saved"] = True  # Flag to show we just saved
                     st.session_state["model"] = model  # Store model for later use
                     st.session_state["user_data"] = user  # Store user data for later use
+                    st.session_state["user_data_list"] = user_list # Store user data for later use
                 
                 st.session_state.scroll_to_top = True
                 st.rerun()
@@ -1117,7 +1153,35 @@ are not mistakenly classified as low risk.
                 st.pyplot(fig, transparent=True, width='stretch')
             # end importance plot
 
-## Shap explanaition---------------------------------------------
+#### add another model--------------------------------------------
+            # Get SHAP values for your user 
+            st.write("-------")
+            st.markdown("#### Voting classifier")     
+            PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+            MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_soft_voting_rf_gb_xgb_lr.sav")
+            model = pickle.load(open(MODEL_PATH, 'rb'))
+          
+            user = st.session_state["user_data"]
+            st.write("currently facing issues")
+            # st.write(user.dtypes)
+            # st.write(user.isna().sum())
+
+            # print(user)
+            # prediction = model.predict_proba(user)[:, 1] #>= 0.5  
+            # st.write(f"#### Your current heart attack risk factor:", {round(prediction[0]*100,2)} ,"%")
+
+            
+            # if st.session_state["risk_value2"] is not False:
+            #     user2 = st.session_state["user_data2"] 
+            #     with st.spinner('Updating importances...'):
+            #         fig, importance_df = compute_shap_plot_voting(model, user, user2) 
+            # else:
+            #     with st.spinner('Plotting importances...'):
+            #         fig, importance_df = compute_shap_plot_voting(model, user)
+            # st.pyplot(fig, transparent=True, width='stretch')
+
+
+## Shap explanation---------------------------------------------
             with st.expander("SHAP Values Explained"):
                 st.write("""
 SHAP values show how much each health factor (age, smoking, etc.) pushed the prediction higher or lower from the average baseline risk. Positive values increase heart disease risk, while negative values decrease it. All values add up to give the final prediction, explaining exactly why the model arrived at that specific percentage.
