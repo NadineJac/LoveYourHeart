@@ -169,6 +169,8 @@ PROFILE_GROUPS = {
     ],
     "General Health": [
         "general_health",
+        "weight",
+        "height",
         "bmi",
         "sleep_time",
         "physical_activity",
