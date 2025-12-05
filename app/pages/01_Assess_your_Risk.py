@@ -410,7 +410,7 @@ if "profile_submitted" not in st.session_state:
 #####
 col_left, col_right = st.columns([1, 2], gap="large")
 with col_left:
-    with st.expander("How it works", expanded=True):
+    with st.expander("How it works"):
         st.markdown("""
     1. **Enter Your Health Information:** Provide details about your lifestyle and health factors such as age, BMI, smoking status, physical activity, and medical history. These are the inputs our machine learning model uses to estimate your heart disease risk.
     2. **Get Your Personalized Risk Score:** Once you submit your information, the app instantly calculates your risk level and displays it as an easy-to-read gauge (Low, Moderate, or High risk).
@@ -903,6 +903,30 @@ with col_left:
                 st.write(f":grey[🔎 **95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%]")
                 # END CI
 
+                with st.expander("What does this mean?"):
+                    st.write("""
+This score reflects how similar your answers are to people in the survey who reported a heart attack.
+
+**What this doesn’t mean:**
+* It is not a medical diagnosis
+* It doesn’t tell your personal real-world risk
+
+**What this does mean:**
+* People with similar answers in the dataset had this likelihood of reporting a heart attack
+* It helps identify patterns that might be worth discussing with a doctor
+
+
+**Risk category:**                             
+Below you can find your risk category.  We divide the probability score into different risk categories using thresholds  
+chosen to *reduce false negatives* in the high-risk group.
+
+A *false negative* means the model predicts *“low risk”* even though the
+person’s information is similar to people in the dataset who *reported a heart attack*.
+
+Reducing false negatives helps ensure that users with a high-risk pattern
+are not mistakenly classified as low risk.
+                             """)
+
             with col2:
 # What-if info box---------------------------------------------------------
                 if st.session_state["risk_value2"] is not False:
@@ -1040,6 +1064,8 @@ with col_left:
             else:
                 st.info("✅ Low Risk. Maintain a healthy lifestyle to keep your risk low.") 
 
+            st.write("-------------")
+
 # start feature importance chart ------------------------------------
             # Get SHAP values for your user        
             model = st.session_state["model"]
@@ -1052,11 +1078,9 @@ with col_left:
                 with st.spinner('Plotting importances...'):
                     fig, importance_df = compute_shap_plot(model, user)
 
-# advide based on feature importance-----------------------------------
-            with st.expander("What Are Modifiable Factors?"):
-                st.write("""
-            Modifiable factors are health behaviors and conditions you have control over—like smoking cessation, physical activity levels, diet quality, alcohol consumption, and weight management. Unlike non-modifiable factors (age, sex, genetics), these can be changed to reduce your heart disease risk.")
-                        """)
+# divide based on feature importance-----------------------------------
+            st.markdown("#### What Influenced Your Score")
+
             col1, col12 = st.columns(2)
             with col1:
                 st.markdown("##### ✅ Priority actions – highly modifiable factors")
@@ -1083,7 +1107,11 @@ with col_left:
                         st.write(f"🟠 **{row['feature']}**: +{row['shap_value']:.3f}")
                 else:
                     st.info("No moderately modifiable factors currently increasing risk.")
-
+            
+            with st.expander("What Are Modifiable Factors?"):
+                st.write("""
+            Modifiable factors are health behaviors and conditions you have control over—like smoking cessation, physical activity levels, diet quality, alcohol consumption, and weight management. Unlike non-modifiable factors (age, sex, genetics), these can be changed to reduce your heart disease risk.")
+                        """)
             # plotting
             with st.spinner("Visualizing all important factors..."):
                 st.pyplot(fig, transparent=True, width='stretch')
