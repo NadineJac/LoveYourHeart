@@ -68,6 +68,10 @@ if st.session_state.get("physhealth_value"):
     user_profile["physical_health_poor"] = (f"{st.session_state["physhealth_value"]} days/month")
 if st.session_state.get("risk_value"):
     user_profile["risk"] = (f"{st.session_state["risk_value"]}%")
+if st.session_state.get("weight"):
+    user_profile["weight"] = st.session_state["weight"]
+if st.session_state.get("height"):
+    user_profile["height"] = st.session_state["height"]
 
 
 profile_text = ""
