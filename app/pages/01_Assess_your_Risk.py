@@ -1225,7 +1225,7 @@ SHAP values show how much each health factor (age, smoking, etc.) pushed the pre
 
             # Generate initial recommendation
             answer = rag_bot.chat(
-                "as bullet points with the following headings: Healthy Habits, Modifiable Risk Factors, Recommendations"
+                "as bullet points with the following heading: Health Recommendations"
             )
             initial_recommendation = answer.response
            # Prepare the what-if data only if exists
