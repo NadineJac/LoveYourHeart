@@ -10,6 +10,10 @@ def compute_shap_plot_voting(pipeline, user, user2=None, background_data=None):
     """
 
     # Preprocess user data
+    import shap
+    import pandas as pd
+    import numpy as np
+    import matplotlib.pyplot as plt
     X_user_preprocessed = pipeline.named_steps["preprocess"].transform(user)
     
     # Get encoded feature names

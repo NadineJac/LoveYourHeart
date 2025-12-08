@@ -8,7 +8,6 @@ import pandas as pd
 import shap
 from streamlit_scroll_to_top import scroll_to_here
 import numpy as np
-import shap
 import matplotlib.pyplot as plt
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
@@ -1160,25 +1159,31 @@ are not mistakenly classified as low risk.
             PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
             MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_soft_voting_rf_gb_xgb_lr.sav")
             model = pickle.load(open(MODEL_PATH, 'rb'))
+            BACKGROUND_PATH = os.path.join(PROJECT_ROOT, "models", "background_sample.sav")
+            background_sample = pickle.load(open(BACKGROUND_PATH, 'rb'))
           
             user = st.session_state["user_data"]
-            st.write("currently facing issues")
+            #if user["PhysicalActivity"] >= 1:
+            user["PhysicalActivity"]='Yes'
+            #else:
+                #user["PhysicalActivity"]='No' 
+            #st.write("currently facing issues")
             # st.write(user.dtypes)
             # st.write(user.isna().sum())
 
             # print(user)
-            # prediction = model.predict_proba(user)[:, 1] #>= 0.5  
-            # st.write(f"#### Your current heart attack risk factor:", {round(prediction[0]*100,2)} ,"%")
+            prediction = model.predict_proba(user)[:, 1] #>= 0.5  
+            st.write(f"#### Your current heart attack risk factor:", {round(prediction[0]*100,2)} ,"%")
 
             
-            # if st.session_state["risk_value2"] is not False:
-            #     user2 = st.session_state["user_data2"] 
-            #     with st.spinner('Updating importances...'):
-            #         fig, importance_df = compute_shap_plot_voting(model, user, user2) 
-            # else:
-            #     with st.spinner('Plotting importances...'):
-            #         fig, importance_df = compute_shap_plot_voting(model, user)
-            # st.pyplot(fig, transparent=True, width='stretch')
+            if st.session_state["risk_value2"] is not False:
+                user2 = st.session_state["user_data2"] 
+                with st.spinner('Updating importances...'):
+                    fig, importance_df = compute_shap_plot_voting(model, user, user2,background_sample) 
+            else:
+                with st.spinner('Plotting importances...'):
+                    fig, importance_df = compute_shap_plot_voting(model, user,background_data=background_sample)
+            st.pyplot(fig, transparent=True, width='stretch')
 
 
 ## Shap explanation---------------------------------------------
