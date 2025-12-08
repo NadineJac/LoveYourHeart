@@ -1,4 +1,6 @@
 import streamlit as st
+import os
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 # Page config
 st.set_page_config(page_title="Documentation", page_icon="🫀", layout="wide")
 st.markdown("""
@@ -79,7 +81,8 @@ The dataset consists of both categorical and numerical features representing dem
 
 Heart disease is heavily imbalanced (only ~8% "Yes").
 """)
-st.image("../images/img_class_distribution.png", caption="distribution of target lable heart attack")
+IMG_PATH = os.path.join(PROJECT_ROOT, "images", "img_class_distribution.png")
+st.image(IMG_PATH, caption="distribution of target lable heart attack")
 
 st.markdown("""
 
