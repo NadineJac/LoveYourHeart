@@ -519,6 +519,8 @@ with col_left:
                     ["No", "Yes"], 
                     default=st.session_state.get("smoker_value")
                 )
+
+                
                 # Alcohol drinking
                 alc_value = st.number_input(
                     "How many alcoholic drinks do you drink per week?", 
@@ -527,14 +529,16 @@ with col_left:
                     value=int(st.session_state.get("alc_value",0)),
                     key = "input_alc"
                 )
+                
+                # Excercise
+                excercise_value = st.segmented_control(
+                        "Did you exercise in the last 30 days?", 
+                        ["No", "Yes"], 
+                        default=st.session_state.get("excercise_value")
+                    )
 
                 st.write("**On how many days in the last 30 days:**")
-                # Excercise
-                excercise_value = st.select_slider(
-                    "Did you excercise?", 
-                    range(0, 31), 
-                    value=st.session_state.get("excercise_value")
-                )
+                
                 # Physical health
                 physhealth_value = st.select_slider(
                     "Was your physical health not good?", 
@@ -658,10 +662,11 @@ with col_left:
                 
                 with st.spinner("Estimating your heart attack risk..."):
                     # Load model and make prediction
-
                     PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-                    MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_gradBoost.sav")#logReg.sav")
+                    MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_soft_voting_rf_gb_xgb_lr.sav")
                     model = pickle.load(open(MODEL_PATH, 'rb'))
+                    BACKGROUND_PATH = os.path.join(PROJECT_ROOT, "models", "background_sample.sav")
+                    background_sample = pickle.load(open(BACKGROUND_PATH, 'rb'))
 
                     user = pd.DataFrame({             
                         'Sex': [sex_value],
@@ -711,6 +716,7 @@ with col_left:
                     st.session_state["profile_submitted"] = True
                     st.session_state["just_saved"] = True  # Flag to show we just saved
                     st.session_state["model"] = model  # Store model for later use
+                    st.session_state["background_sample"]=background_sample
                     st.session_state["user_data"] = user  # Store user data for later use
                     st.session_state["user_data_list"] = user_list # Store user data for later use
                 
@@ -785,15 +791,16 @@ with col_left:
                         key = "alc_input_whatif"
                     )
 
-                    st.write("**On how many days in the last 30 days:**")
                     # Excercise
-                    excercise_value = st.select_slider(
-                        "Did you excercise?", 
-                        range(0, 31), 
-                        value=st.session_state.get("excercise_value"),
+                    excercise_value = st.segmented_control(
+                        "Did you exercise in the last 30 days?", 
+                        ["No", "Yes"], 
+                        default=st.session_state.get("excercise_value"),
                         key = "exercise_input_whatif"
                     )
-                    # Physical health
+
+                    st.write("**On how many days in the last 30 days:**")
+                     # Physical health
                     physhealth_value = st.select_slider(
                         "Was your physical health not good?", 
                         range(0, 31), 
@@ -1105,14 +1112,16 @@ are not mistakenly classified as low risk.
             # Get SHAP values for your user        
             model = st.session_state["model"]
             user = st.session_state["user_data"]
+            background_sample = st.session_state["background_sample"]
+                      
             if st.session_state["risk_value2"] is not False:
                 user2 = st.session_state["user_data2"] 
                 with st.spinner('Updating importances...'):
-                    fig, importance_df = compute_shap_plot(model, user, user2) 
+                    fig, importance_df = compute_shap_plot_voting(model, user, user2=user2, background_data=background_sample) 
             else:
                 with st.spinner('Plotting importances...'):
-                    fig, importance_df = compute_shap_plot(model, user)
-
+                    fig, importance_df = compute_shap_plot_voting(model, user,background_data=background_sample)
+            
 # divide based on feature importance-----------------------------------
             st.markdown("#### What Influenced Your Score")
 
@@ -1151,40 +1160,6 @@ are not mistakenly classified as low risk.
             with st.spinner("Visualizing all important factors..."):
                 st.pyplot(fig, transparent=True, width='stretch')
             # end importance plot
-
-#### add another model--------------------------------------------
-            # Get SHAP values for your user 
-            st.write("-------")
-            st.markdown("#### Voting classifier")     
-            PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-            MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_soft_voting_rf_gb_xgb_lr.sav")
-            model = pickle.load(open(MODEL_PATH, 'rb'))
-            BACKGROUND_PATH = os.path.join(PROJECT_ROOT, "models", "background_sample.sav")
-            background_sample = pickle.load(open(BACKGROUND_PATH, 'rb'))
-          
-            user = st.session_state["user_data"]
-            #if user["PhysicalActivity"] >= 1:
-            user["PhysicalActivity"]='Yes'
-            #else:
-                #user["PhysicalActivity"]='No' 
-            #st.write("currently facing issues")
-            # st.write(user.dtypes)
-            # st.write(user.isna().sum())
-
-            # print(user)
-            prediction = model.predict_proba(user)[:, 1] #>= 0.5  
-            st.write(f"#### Your current heart attack risk factor:", {round(prediction[0]*100,2)} ,"%")
-
-            
-            if st.session_state["risk_value2"] is not False:
-                user2 = st.session_state["user_data2"] 
-                with st.spinner('Updating importances...'):
-                    fig, importance_df = compute_shap_plot_voting(model, user, user2,background_sample) 
-            else:
-                with st.spinner('Plotting importances...'):
-                    fig, importance_df = compute_shap_plot_voting(model, user,background_data=background_sample)
-            st.pyplot(fig, transparent=True, width='stretch')
-
 
 ## Shap explanation---------------------------------------------
             with st.expander("SHAP Values Explained"):

@@ -89,7 +89,7 @@ def compute_shap_plot_voting(pipeline, user, user2=None, background_data=None):
                 changed_features.append(col)
         
         # Compute SHAP values for user2
-        X_user2_preprocessed = model.named_steps["prep"].transform(user2)
+        X_user2_preprocessed = pipeline.named_steps["preprocess"].transform(user2)
         shap_values2 = explainer(X_user2_preprocessed)
         
         # Aggregate SHAP values for user2
