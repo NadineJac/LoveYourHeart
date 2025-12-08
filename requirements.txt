@@ -18,3 +18,4 @@ llama-index-embeddings-instructor
 shap
 imblearn
 xgboost
+catboost

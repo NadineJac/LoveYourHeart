@@ -663,10 +663,12 @@ with col_left:
                 with st.spinner("Estimating your heart attack risk..."):
                     # Load model and make prediction
                     PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-                    MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_soft_voting_rf_gb_xgb_lr.sav")
+                    MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_soft_voting.sav") # did not work with "trained_pipe_voting.sav"
                     model = pickle.load(open(MODEL_PATH, 'rb'))
                     BACKGROUND_PATH = os.path.join(PROJECT_ROOT, "models", "background_sample.sav")
                     background_sample = pickle.load(open(BACKGROUND_PATH, 'rb'))
+                    voting_threshold = pickle.load(open(os.path.join(
+                        PROJECT_ROOT, "models", "trained_pipe_voting_threshold.sav"), 'rb'))
 
                     user = pd.DataFrame({             
                         'Sex': [sex_value],
