@@ -1194,7 +1194,13 @@ SHAP values show how much each health factor (age, smoking, etc.) pushed the pre
                          """)
 
 # PDF Report dowload button ------------------------------------
-
+            # absolute path based on file location
+            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+            VECTOR_INDEX_DIR = os.path.join(BASE_DIR, "..", "content", "vector_index")
+            VECTOR_INDEX_DIR = os.path.normpath(VECTOR_INDEX_DIR)
+            
+            EMBEDDING_DIR = os.path.join(BASE_DIR, "..", "content", "embedding_model")
+            EMBEDDING_DIR = os.path.normpath(EMBEDDING_DIR)
             # Recommendations
             profile_text = "User profile information:\n"
             for k,v in user.items():
