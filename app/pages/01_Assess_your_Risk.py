@@ -937,14 +937,15 @@ with col_left:
                 st.write("#### Your current heart attack risk factor:", str(st.session_state["risk_value"]),"%")
             
                 # Confidence Interval(CI)
-                model = st.session_state["model"]
-                X_user = st.session_state["user_data"]
-                lower_ci, upper_ci = bootstrap_confidence_interval_single_row(
-                    model,
-                    X_user
-                )
-                # Display the confidence interval
-                st.write(f":grey[🔎 **95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%]")
+                with st.spinner("Calculating a confidence interval..."):
+                    model = st.session_state["model"]
+                    X_user = st.session_state["user_data"]
+                    lower_ci, upper_ci = bootstrap_confidence_interval_single_row(
+                        model,
+                        X_user
+                    )
+                    # Display the confidence interval
+                    st.write(f":grey[🔎 **95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%]")
                 # END CI
 
                 with st.expander("What does this mean?"):
@@ -959,6 +960,9 @@ This score reflects how similar your answers are to people in the survey who rep
 * People with similar answers in the dataset had this likelihood of reporting a heart attack
 * It helps identify patterns that might be worth discussing with a doctor
 
+                             
+**95% Confidence Interval:**
+We're 95% confident your actual score falls somewhere in this range. The wider the range, the less certain we are about the exact number.
 
 **Risk category:**                             
 Below you can find your risk category.  We divide the probability score into different risk categories using thresholds  
