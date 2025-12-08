@@ -28,9 +28,20 @@ from xgboost import XGBClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix
 import shap
+import hashlib
 
 #----------------------------------------------------------------------------
 ### Define functions
+#caching
+@st.cache_data(show_spinner=False)
+def compute_shap_plot_voting_cached(_model, _user_df, _user2_df, _background_sample):
+    """Cached version of SHAP plot computation"""
+    # Convert dataframes to hashable format for caching
+    return compute_shap_plot_voting(_model, _user_df, user2=_user2_df, background_data=_background_sample)
+@st.cache_data(show_spinner=False)
+def bootstrap_confidence_interval_cached(_model, _user_df):
+    """Cached version of bootstrap confidence interval computation"""
+    return bootstrap_confidence_interval_single_row(_model, _user_df)
 
 ## Scrolling
 if 'scroll_to_top' not in st.session_state:
@@ -691,28 +702,6 @@ with col_left:
                         'PhysicalHealth': [physhealth_value] 
                     })
 
-                    user_list = pd.DataFrame([{             
-                        'Sex': [sex_value],
-                        'Age': [age_value],
-                        'Race': [race_cat],
-                        'SleepTime': [sleep_value],
-                        'AgeCategory': [age_cat],
-                        'Smoking': [smoker_value], 
-                        'AlcoholDrinking': [alc_cat],
-                        'BMI': [round(bmi_value,2)],
-                        'Diabetic': [diabetes_value],                
-                        'Stroke': [stroke_value],
-                        'Asthma': [asthma_value],
-                        'KidneyDisease': [kidney_value],
-                        'SkinCancer': [skin_value],
-                        'PhysicalActivity':[excercise_value],
-                        'MentalHealth': [mentalhealth_value],
-                        'DiffWalking': [walk_value],
-                        'GenHealth': [health_cat],
-                        'PhysicalHealth': [physhealth_value] 
-                    }])
-
-                    #prediction = model.predict(user)
                     prediction = model.predict_proba(user)[:, 1] #>= 0.5
                     st.session_state["risk_value"] = round(prediction[0]*100,2)  # Store as percentage
                     st.session_state["profile_submitted"] = True
@@ -720,7 +709,6 @@ with col_left:
                     st.session_state["model"] = model  # Store model for later use
                     st.session_state["background_sample"]=background_sample
                     st.session_state["user_data"] = user  # Store user data for later use
-                    st.session_state["user_data_list"] = user_list # Store user data for later use
                 
                 st.session_state.scroll_to_top = True
                 st.rerun()
@@ -937,15 +925,18 @@ with col_left:
                 st.write("#### Your current heart attack risk factor:", str(st.session_state["risk_value"]),"%")
             
                 # Confidence Interval(CI)
-                with st.spinner("Calculating a confidence interval..."):
-                    model = st.session_state["model"]
-                    X_user = st.session_state["user_data"]
-                    lower_ci, upper_ci = bootstrap_confidence_interval_single_row(
-                        model,
-                        X_user
-                    )
-                    # Display the confidence interval
-                    st.write(f":grey[🔎 **95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%]")
+                cache_key = "ci_result"
+                if cache_key not in st.session_state:
+                    with st.spinner("Calculating a confidence interval..."):
+                        model = st.session_state["model"]
+                        X_user = st.session_state["user_data"]
+                        lower_ci, upper_ci = bootstrap_confidence_interval_cached(model, X_user)
+                        st.session_state[cache_key] = (lower_ci, upper_ci)
+                else:
+                    lower_ci, upper_ci = st.session_state[cache_key]
+
+                # Display the confidence interval
+                st.write(f":grey[🔎 **95% Confidence Interval:** {lower_ci:.1f}% – {upper_ci:.1f}%]")
                 # END CI
 
                 with st.expander("What does this mean?"):
@@ -978,18 +969,20 @@ are not mistakenly classified as low risk.
             with col2:
 # What-if info box---------------------------------------------------------
                 if st.session_state["risk_value2"] is not False:
-                    with st.spinner("Running the simulation..."):
-                        X_user2 = st.session_state["user_data2"]
-                        model = st.session_state["model"]
+                    X_user = st.session_state["user_data"]
+                    X_user2 = st.session_state["user_data2"]
 
+                    cache_key = "ci_result_whatif"
+                    if cache_key not in st.session_state:
+                        with st.spinner("Running the simulation..."):
+                            model = st.session_state["model"]                           
+                            lower_ci2, upper_ci2 = bootstrap_confidence_interval_cached(model, X_user)
+                            st.session_state[cache_key] = (lower_ci2, upper_ci2)
+                    else:
+                        lower_ci2, upper_ci2 = st.session_state[cache_key]
+                    
                         # Collect changes
-                        differences = display_changes_compact(X_user, X_user2)
-
-                        # Confidence Interval
-                        lower_ci2, upper_ci2 = bootstrap_confidence_interval_single_row(
-                            model,
-                            X_user2
-                        )
+                        differences = display_changes_compact(X_user, X_user2)                       
 
                         # Assemble infobox content
                         info_text = ["#### 💭 What if?"]
@@ -1015,13 +1008,7 @@ are not mistakenly classified as low risk.
             # Get risk value and compute confidence interval
             with st.spinner("Plotting your risk..."):
                 risk_percent = st.session_state["risk_value"]
-                model = st.session_state["model"]
-                X_user = st.session_state["user_data"]
-
-                lower_ci, upper_ci = bootstrap_confidence_interval_single_row(
-                    model,
-                    X_user
-                )
+                lower_ci, upper_ci = st.session_state["ci_result"]
 
                 # Optional: Get What-If risk if available
                 whatif_risk = st.session_state.get("risk_value2", None)
@@ -1119,21 +1106,37 @@ are not mistakenly classified as low risk.
             model = st.session_state["model"]
             user = st.session_state["user_data"]
             background_sample = st.session_state["background_sample"]
-                      
+
             if st.session_state["risk_value2"] is not False:
-                user2 = st.session_state["user_data2"] 
-                with st.spinner('Updating importances...'):
-                    fig, importance_df = compute_shap_plot_voting(model, user, user2=user2, background_data=background_sample) 
+                user2 = st.session_state["user_data2"]
+                
+                # Check if plot is already cached in session state
+                cache_key = "shap_plot_with_whatif"
+                if cache_key not in st.session_state:
+                    with st.spinner('Updating importances...'):
+                        fig, importance_df = compute_shap_plot_voting_cached(
+                            model, user, user2, background_sample
+                        )
+                        st.session_state[cache_key] = (fig, importance_df)
+                else:
+                    fig, importance_df = st.session_state[cache_key]
             else:
-                with st.spinner('Plotting importances...'):
-                    fig, importance_df = compute_shap_plot_voting(model, user,background_data=background_sample)
+                cache_key = "shap_plot_no_whatif"
+                if cache_key not in st.session_state:
+                    with st.spinner('Plotting importances...'):
+                        fig, importance_df = compute_shap_plot_voting_cached(
+                            model, user, None, background_sample
+                        )
+                        st.session_state[cache_key] = (fig, importance_df)
+                else:
+                    fig, importance_df = st.session_state[cache_key]
             
 # divide based on feature importance-----------------------------------
             st.markdown("#### What Influenced Your Score")
 
             col1, col12 = st.columns(2)
             with col1:
-                st.markdown("##### ✅ Priority actions – highly modifiable factors")
+                st.markdown("##### Priority actions: highly modifiable factors")
                 high_risk = importance_df[
                     (importance_df['modifiability'] == 'highly') &
                     (importance_df['shap_value'] > 0)
@@ -1145,7 +1148,7 @@ are not mistakenly classified as low risk.
                 else:
                     st.success("No highly modifiable factors currently increasing risk.")
             with col12:
-                st.markdown("##### ⚠️ Secondary actions – moderately modifiable factors")
+                st.markdown("##### Secondary actions: moderately modifiable factors")
 
                 moderate_risk = importance_df[
                     (importance_df['modifiability'] == 'moderately') &
