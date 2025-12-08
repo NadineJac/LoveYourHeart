@@ -1207,7 +1207,7 @@ SHAP values show how much each health factor (age, smoking, etc.) pushed the pre
 
             # Load embeddings & vector index (same as AI Assistant)
             embeddings = HuggingFaceEmbedding(model_name="sentence-transformers/distiluse-base-multilingual-cased-v1")
-            storage_context = StorageContext.from_defaults(persist_dir="content/vector_index")
+            storage_context = StorageContext.from_defaults()
             vector_index = load_index_from_storage(storage_context, embed_model=embeddings)
             retriever = vector_index.as_retriever(similarity_top_k=2)
 
