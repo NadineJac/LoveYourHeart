@@ -1226,7 +1226,7 @@ SHAP values show how much each health factor (age, smoking, etc.) pushed the pre
             # Generate initial recommendation
             answer = rag_bot.chat(
                 "\nRules:\n"
-                "- Output ONLY 3–4 short bullet points (<50 words each).\n"
+                "- Output ONLY 3–4 short bullet points (<25 words each).\n"
                 "- Use the user profile to give personalized health advice.\n"
                 "- If Smoking='Yes' → include smoking cessation advice.\n"
                 "- If Diabetes='Yes' → include diet & glucose control advice.\n"
