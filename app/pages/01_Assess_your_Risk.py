@@ -54,11 +54,15 @@ from utils import compute_shap_plot_voting
 #----------------------------------------------------------------------------
 ### Define functions
 #caching
-@st.cache_data(show_spinner=False)
-def compute_shap_plot_voting_cached(_model, _user_df, _user2_df, _background_sample):
-    """Cached version of SHAP plot computation"""
-    # Convert dataframes to hashable format for caching
-    return compute_shap_plot_voting(_model, _user_df, user2=_user2_df, background_data=_background_sample)
+@st.cache_data(
+    show_spinner=False,
+    hash_funcs={
+        pd.DataFrame: lambda df: tuple(sorted(df.iloc[0].to_dict().items()))
+    }
+)
+def compute_shap_plot_voting_cached(_model, user_df, user2_df, background_sample):
+    return compute_shap_plot_voting(_model, user_df, user2=user2_df, background_data=background_sample)
+
 
 @st.cache_data(
     show_spinner=False,
@@ -945,11 +949,11 @@ are not mistakenly classified as low risk.
             user = st.session_state["user_data"]
             background_sample = st.session_state["background_sample"]
 
-            if st.session_state["risk_value2"] is not False:
+            if st.session_state["risk_value2"] is not False: #whatif
                 user2 = st.session_state["user_data2"]
                 
                 # Check if plot is already cached in session state
-                cache_key = "shap_plot_with_whatif"
+                cache_key = f"shap_plot_with_whatif_{hash(tuple(sorted(user2.iloc[0].to_dict().items())))}"
                 if cache_key not in st.session_state:
                     with st.spinner('Updating importances...'):
                         fig, importance_df = compute_shap_plot_voting_cached(
@@ -958,8 +962,8 @@ are not mistakenly classified as low risk.
                         st.session_state[cache_key] = (fig, importance_df)
                 else:
                     fig, importance_df = st.session_state[cache_key]
-            else:
-                cache_key = "shap_plot_no_whatif"
+            else: #no whatif
+                cache_key = f"shap_plot_no_whatif_{hash(tuple(sorted(user.iloc[0].to_dict().items())))}"
                 if cache_key not in st.session_state:
                     with st.spinner('Plotting importances...'):
                         fig, importance_df = compute_shap_plot_voting_cached(
