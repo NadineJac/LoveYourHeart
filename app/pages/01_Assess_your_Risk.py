@@ -997,25 +997,25 @@ are not mistakenly classified as low risk.
                     else:
                         lower_ci2, upper_ci2 = st.session_state[cache_key]
                     
-                        # Collect changes
-                        differences = display_changes_compact(X_user, X_user2)                       
+                    # Collect changes
+                    differences = display_changes_compact(X_user, X_user2)                       
 
-                        # Assemble infobox content
-                        info_text = ["#### 💭 What if?"]
-                        info_text.append("##### Changed Risk Factors")
+                    # Assemble infobox content
+                    info_text = ["#### 💭 What if?"]
+                    info_text.append("##### Changed Risk Factors")
 
-                        if differences:                        
-                            info_text.extend(differences)
-                            info_text.append(
-                                f"##### What-If Heart Attack Risk: **{st.session_state['risk_value2']}%**"
-                            )
+                    if differences:                        
+                        info_text.extend(differences)
+                        info_text.append(
+                            f"##### What-If Heart Attack Risk: **{st.session_state['risk_value2']}%**"
+                        )
 
-                            info_text.append(
-                                f"🔎 **95% Confidence Interval:** "
-                                f"{lower_ci2:.1f}% – {upper_ci2:.1f}%"
-                            )
-                        else:
-                            info_text.append("_No changes detected._")   
+                        info_text.append(
+                            f"🔎 **95% Confidence Interval:** "
+                            f"{lower_ci2:.1f}% – {upper_ci2:.1f}%"
+                        )
+                    else:
+                        info_text.append("_No changes detected._")   
                     # Display everything in one infobox
                     st.info("\n\n".join(info_text))
 
