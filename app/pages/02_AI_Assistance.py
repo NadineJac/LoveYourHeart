@@ -1,11 +1,13 @@
+# Core Python
 import os
-
+# LLM and RAG
 from llama_index.llms.groq import Groq
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core import StorageContext, load_index_from_storage
 from llama_index.core.chat_engine import ContextChatEngine
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.base.llms.types import ChatMessage, MessageRole
+# Streamlit
 import streamlit as st
 
 # absolute path based on file location
@@ -15,20 +17,6 @@ VECTOR_INDEX_DIR = os.path.normpath(VECTOR_INDEX_DIR)
 
 EMBEDDING_DIR = os.path.join(BASE_DIR, "..", "content", "embedding_model")
 EMBEDDING_DIR = os.path.normpath(EMBEDDING_DIR)
-
-# Initialize session state keys if they don't exist
-# if "sex_value" not in st.session_state:
-#     st.session_state["sex_value"] = None
-# if "age_value" not in st.session_state:
-#     st.session_state["age_value"] = None
-# if "smoker_value" not in st.session_state:
-#     st.session_state["smoker_value"] = None
-# if "diabetes_value" not in st.session_state:
-#     st.session_state["diabetes_value"] = None
-# if "bmi_value" not in st.session_state:
-#     st.session_state["bmi_value"] = None
-# if "risk_value" not in st.session_state:
-#     st.session_state["risk_value"] = None
 
 # setup user profile
 user_profile = {}
@@ -218,9 +206,6 @@ if user_profile:
 else:
     st.info("👈 Complete your profile in the **Assess your Risk** page for personalized health advice!")
 
-
-
-# Display chat messages from history on app rerun
 # Display chat messages from history on app rerun
 # Skip the initial recommendation messages (first 2messages)
 for message in st.session_state.rag_bot.chat_history[2:]:
