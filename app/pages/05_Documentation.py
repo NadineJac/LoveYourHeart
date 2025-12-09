@@ -2,6 +2,17 @@ import streamlit as st
 import os
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
+from streamlit_scroll_to_top import scroll_to_here
+
+# Call at the bottom of your app
+if 'scroll_to_top' not in st.session_state:
+    st.session_state.scroll_to_top = False
+if st.session_state.scroll_to_top:
+    scroll_to_here(0, key='top')  # Scroll to the top of the page
+    st.session_state.scroll_to_top = False  # Reset the state after scrolling
+def scroll():
+    st.session_state.scroll_to_top = True
+
 # Page config
 st.set_page_config(page_title="Documentation", page_icon="🫀", layout="wide")
 
@@ -12,7 +23,7 @@ with col_left:
 # 🫀 Heart Disease Risk Prediction Using Machine Learning  
 A comprehensive end-to-end health analytics & ML project focused on predicting a person's heart attack riskusing clinical, lifestyle, and demographic def-reprot data.
 """)
-  with st.expander("## 📌 Table of Contents"):
+  with st.expander("## 📌 Table of Contents", expanded=True):
     st.markdown("""
   - [🧩 Project Overview](#project-overview)
   - [❗ Problem Statement](#problem-statement)
@@ -389,3 +400,4 @@ The final model is suitable for interactive applications, supporting personalize
 
 Looking forward, the app can be extended with richer clinical features, continuous monitoring, and integration into mobile-based health platforms to further enhance user support.
 """)
+  st.button("↑ Scroll to Top", on_click=scroll)
