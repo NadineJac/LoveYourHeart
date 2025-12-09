@@ -1,16 +1,19 @@
 import streamlit as st
 import os
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+
 # Page config
 st.set_page_config(page_title="Documentation", page_icon="🫀", layout="wide")
-st.markdown("""
-# 🫀 Love Your Heart - Heart Disease Risk Prediction Using Machine Learning
 
+col_left, col_right = st.columns([3, 2], gap="large")
+
+with col_left:
+  st.markdown("""
+# 🫀 Heart Disease Risk Prediction Using Machine Learning  
 A comprehensive end-to-end health analytics & ML project focused on predicting a person's heart attack riskusing clinical, lifestyle, and demographic def-reprot data.
-
-## 📌 Table of Contents
-- [🫀 Love Your Heart - Heart Disease Risk Prediction Using Machine Learning](#-love-your-heart---heart-disease-risk-prediction-using-machine-learning)
-  - [📌 Table of Contents](#-table-of-contents)
+""")
+  with st.expander("## 📌 Table of Contents"):
+    st.markdown("""
   - [🧩 Project Overview](#-project-overview)
   - [❗ Problem Statement](#-problem-statement)
   - [📊 Dataset Description](#-dataset-description)
@@ -18,7 +21,7 @@ A comprehensive end-to-end health analytics & ML project focused on predicting a
     - [1️⃣ Class Imbalance](#1️⃣-class-imbalance)
     - [2️⃣ Numerical Feature Distributions](#2️⃣-numerical-feature-distributions)
     - [3️⃣ Categorical Feature Distributions](#3️⃣-categorical-feature-distributions)
-    - [4️⃣ 📌 Correlation Heatmap](#4️⃣--correlation-heatmap)
+    - [4️⃣ Correlation Heatmap](#4️⃣-correlation-heatmap)
   - [🧼 Data Preprocessing](#-data-preprocessing)
   - [🤖 Modeling Approach](#-modeling-approach)
     - [🎯 Hyperparameter Tuning](#-hyperparameter-tuning)
@@ -31,15 +34,22 @@ A comprehensive end-to-end health analytics & ML project focused on predicting a
     - [📈 Model Comparison](#-model-comparison)
     - [🎯 Threshold Optimization](#-threshold-optimization)
   - [🧠 Explainability Using SHAP](#-explainability-using-shap)
+    - [Why SHAP?](#why-shap)
+    - [Why KernelExplainer?](#why-kernelexplainer)
+    - [How SHAP is used in this project](#how-shap-is-used-in-this-project)
+    - [What users see](#what-users-see)
   - [🤖 CHATBOT Module:](#-chatbot-module)
-    - [📈 Workflow Diagrams:](#-workflow-diagrams)
+    - [Core Components](#core-components)
+  - [📈 Workflow Diagrams:](#-workflow-diagrams)
       - [1️⃣ System Architecture Diagram](#1️⃣-system-architecture-diagram)
       - [2️⃣ Chatbot Workflow Diagram](#2️⃣-chatbot-workflow-diagram)
-  - [🚀 Final Model Deployment](#-final-model-deployment)
-  - [Limitations](#limitations)
+  - [🚀 Deployment](#-deployment)
+  - [⚠️ Limitations](#️-limitations)
   - [🔮 Future Work](#-future-work)
   - [🏁 Conclusion](#-conclusion)
+      """)
 
+  st.markdown("""
 ## 🧩 Project Overview
 
 We build a machine learning model that predicts the likelihood of heart disease based on a users lifestyle, medical history, and health metrics.
@@ -80,31 +90,30 @@ The dataset consists of both categorical and numerical features representing dem
 ### 1️⃣ Class Imbalance
 
 Heart disease is heavily imbalanced (only ~8% "Yes").
-""")
-IMG_PATH = os.path.join(PROJECT_ROOT, "images", "img_class_distribution.png")
-st.image(IMG_PATH, caption="distribution of target lable heart attack")
+            """)
 
-st.markdown("""
-
-![distribution of target lable heart attack](images/img_class_distribution.png)
+  IMG_PATH = os.path.join(PROJECT_ROOT, "images", "img_class_distribution.png")
+  st.image(IMG_PATH, caption="Distribution of target lable heart attack", width='content')
+  st.markdown("""
 
 Only 8% of the dataset represents heart-attack cases, creating a strong class imbalance. To handle this, techniques like SMOTE (Synthetic Minority Over-sampling Technique), class-weighted models, and threshold tuning were applied to improve detection of high-risk individuals while maintaining overall accuracy. Properly addressing this imbalance is crucial to avoid missing critical high-risk cases.
 
 ### 2️⃣ Numerical Feature Distributions
 Numerical features, including BMI, Age, and PhysicalHealth, display distinct distributions that help identify risk patterns. 
-
-![Age Distribution](../images/img_age_distribution.png)
-
-![BMI distribution](images/img_bmi_distribution.png)
-
+            """)
+  IMG_PATH = os.path.join(PROJECT_ROOT, "images", "img_age_distribution.png")
+  st.image(IMG_PATH, caption="Age Distribution", width='content')
+  st.markdown("""
 ### 3️⃣ Categorical Feature Distributions
 Categorical features such as Sex, Smoking, AlcoholDrinking, and Diabetic exhibit varying proportions across different classes, highlighting trends like higher smoking prevalence among certain groups. 
-
-![Categorical Feature Distributions](images/img_catFeature_distribution.png)
+""")
+  IMG_PATH = os.path.join(PROJECT_ROOT, "images", "img_catFeature_distribution.png")
+  st.image(IMG_PATH, caption="Categorical Feature Distributions", width='content')
+  st.markdown("""
 
 ### 4️⃣ 📌 Correlation Heatmap
 
-![Correlation Heatmap](images/img_corr_heatmap.png)
+![Correlation Heatmap](images/img_corr_heatmap1to-1.png)
 
 The heatmap helps identify which features are most strongly related to heart disease risk. Features like age, sex, smoking, alcohol comsumption, are positively correlated with risk, while lifestyle-related features such as physical activity and adequate sleep are negatively correlated. These insights can guide feature selection
 and interpretation in predictive modeling.
@@ -116,10 +125,11 @@ and interpretation in predictive modeling.
    1. Handling categorical variables via OneHotEncoder
    2. Scaling numerical values
 3. SMOTE (optional depending on model)
-4. Voting classifier
-
-![Pipeline](images/img_pipeline.png)
-
+4. Voting classifier            
+                        """)
+  IMG_PATH = os.path.join(PROJECT_ROOT, "images", "img_pipeline.png")
+  st.image(IMG_PATH, caption="Pipeline", width='content')
+  st.markdown("""
 ## 🤖 Modeling Approach
 
 We used 5 major models:
@@ -143,7 +153,7 @@ Both *GridSearchCV* and *RandomizedSearchCV* were used depending on the model co
 
 These search strategies helped identify optimal parameter ranges such as learning rate, tree depth, and number of estimators.
 
-##### 2. Class Weights
+#### 2. Class Weights
 Because the dataset is highly imbalanced (only ~8% positive cases), class weights were introduced to make the models more sensitive to minority-class predictions:
 Models like Logistic Regression, Random Forest, and GradientBoosting were trained with class_weight='balanced'.
 
@@ -189,8 +199,10 @@ By combining these techniques, each model was optimized to strike a balance betw
 This tuning strategy ultimately enabled the Voting Classifier to outperform individual models in terms of balanced performance.
 
 ### 📈 Model Comparison
-
-![Model Comparison](images/img_model_comparison.png)
+ """)
+  IMG_PATH = os.path.join(PROJECT_ROOT, "images", "img_model_comparison.png")
+  st.image(IMG_PATH, caption="Model Comparison", width='content')
+  st.markdown("""
 
 After evaluating all models across multiple performance metrics, we observed that XGBoost and CatBoost achieved the highest recall scores, making them strong candidates for identifying high-risk individuals. However, both models also produced a larger number of false positives, which can reduce the overall precision of the system.
 
@@ -199,43 +211,93 @@ To balance this trade-off, we incorporated multiple strong learners into a Votin
 Because of this improved overall reliability and its ability to maintain high recall while reducing false alarms, the Voting Classifier was selected as the final model for deployment.
 
 ### 🎯 Threshold Optimization
+ """)
 
-![Precision-Recall Curve](images/img_precision_recall.png)
+  IMG_PATH = os.path.join(PROJECT_ROOT, "images", "img_precision_recall.png")
+  st.image(IMG_PATH, caption="Precision-Recall Curve", width='content')
+  st.markdown("""
 
 In highly imbalanced classification tasks such as heart-disease risk prediction, relying on the default probability threshold of 0.50 often results in a large number of false negatives — cases where high-risk individuals are incorrectly predicted as low-risk. Since missing a positive (high-risk) case has much higher clinical impact, threshold optimization becomes essential.
 
 To address this, we evaluated the model using the Precision–Recall (PR) Curve, which is more informative than ROC-AUC for imbalanced datasets. The Voting Classifier achieved an Average Precision (AP) of 0.194, indicating moderate ability to distinguish minority-class samples across varying thresholds.
 
-By analyzing the PR curve, we identified that lowering the threshold significantly improved recall without causing an unmanageable drop in precision. The optimal balance was achieved at a threshold of 0.19, where:
-- Recall increased substantially, capturing far more true high-risk cases
+The model predicts the **probability of a user belonging to the heart attack class**. Rather than using the standard 0.50 cutoff, we define **risk bands based on a custom-calibrated threshold**, allowing the probability to be translated into actionable risk categories.
 
-- Precision remained acceptable, keeping false positives at a manageable level
+By analyzing the Precision-Recall curve, we found that lowering the threshold significantly improved recall without causing an unmanageable drop in precision. The optimal balance was achieved at a threshold of **0.19**, where:
 
-- False negatives were reduced, which is critical for a health-risk prediction system
+- **Recall increased substantially**, capturing far more true high-risk cases  
+- **Precision remained acceptable**, keeping false positives at a manageable level  
+- **False negatives were minimized**, which is critical for a health-risk prediction system  
 
-Therefore, instead of using the standard 0.50 cutoff, the model operates at a custom-calibrated threshold of 0.19, ensuring better sensitivity toward the minority (positive) class while maintaining practical precision levels. This threshold strategy aligns with our project’s objective: prioritizing early detection of high-risk individuals.
+This threshold strategy ensures the model is **more sensitive to the minority (positive) class**, aligning with the project’s objective of early identification of high-risk individuals. Using the probability output in combination with this threshold, we provide users with **risk bands** rather than a simple binary prediction, giving a more nuanced and interpretable measure of heart-attack risk.
 
-At this threshold:
-* Higher recall
-* Acceptable precision
-* Balanced trade-off
+At this threshold:  
+* Higher recall  
+* Acceptable precision  
+* Balanced trade-off between false negatives and false positives
+
 
 ## 🧠 Explainability Using SHAP
+We use [SHAP](https://shap.readthedocs.io/) (SHapley Additive exPlanations) to make our model’s predictions transparent and understandable. SHAP shows how each input feature increases or decreases the predicted probability that a user’s profile resembles those of individuals in the dataset who reported a past heart attack.
 
 
--- TO BE WRITTEN --
+### Why SHAP?
+* Explains why the model predicts a certain probability
+* Identifies the most influential features (“risk drivers”)
+* Highlights which factors are modifiable
+* Supports What-If analysis (how prediction changes if a user changes an input)
 
+### Why KernelExplainer?
+Our final model is a VotingClassifier combining tree-based and linear models.
+TreeExplainer cannot explain this ensemble, so we use the [*KernelExplainer*](https://shap.readthedocs.io/en/latest/generated/shap.KernelExplainer.html), which is 
 
+➕ Model-agnostic  
+➖ Slower, only returns approximated importances and depends heavily on chosen background data 
+
+### How SHAP is used in this project
+1. **Preprocessing:**   SHAP is applied after full preprocessing (encoding, scaling, imputation) to ensure consistent explanations.
+2. **Prediction wrapper:** SHAP uses a wrapper around the VotingClassifier’s predict_proba() to extract the positive-class probability.
+3. **Background data:** A small subset of the training data (here: first 50 rows, as the prediction becomed slow with more records )is used as SHAP background for stability.
+4. **Feature aggregation:** SHAP values from encoded features are merged back into the original feature names.
+5. **Modifiable factors:** Features are labeled as modifiable or non-modifiable for clearer risk communication.
+6. **What-If analysis:** When a user changes an input, SHAP computes a second explanation and displays differences as blue dots.
+
+### What users see
+* Bars → feature influence (positive/negative)
+* Colors → modifiability of the factor
+* Labels → user’s actual input
+* Optional blue dots → What-If scenario differences
+
+This ensures transparent, actionable, and user-friendly interpretations.
 
 ## 🤖 CHATBOT Module:
+Our application includes an AI-powered chatbot that helps users interpret their heart-risk results and receive tailored lifestyle guidance. It is built using a **Retrieval-Augmented Generation (RAG)** pipeline, ensuring responses remain factual, context-aware, and grounded in trusted cardiovascular-health sources.
 
-Our application also includes an AI-powered Chatbot designed to provide personalized recommendations based on user-specific health inputs. The chatbot is implemented using a Retrieval-Augmented Generation (RAG) pipeline, ensuring that responses are accurate, context-aware, and grounded in the domain knowledge relevant to heart-risk assessment.
+### Core Components
+**LLM**  
+We use **Groq’s `llama-3.3-70b-versatile`**, chosen for its fast inference, strong reasoning ability, and robust multilingual support.
 
-To enhance its reasoning capabilities, the chatbot leverages modern Large Language Models (LLMs) and integrates multiple API sources, including the GROQ API and HUGGINGFACE models, enabling a balanced blend of speed, accuracy, and medical-focused contextual understanding. User interactions and prior results are stored through a controlled memory component, allowing the system to maintain continuity and deliver more tailored insights without compromising privacy.
+**Embedding Model**  
+The chatbot relies on **`sentence-transformers/distiluse-base-multilingual-cased-v1`**, which supports **German and English** and provides efficient, high-quality semantic embeddings. These are stored locally for speed and reproducibility.
 
-Overall, the chatbot acts as an interactive layer of support—helping users interpret their predictions, understand lifestyle implications, and receive personalized guidance throughout the risk-screening process.
+**Knowledge Base**  
+The chatbot’s responses are grounded in a curated evidence base drawn from cardiovascular prevention guidelines, German population-health summaries, practical lifestyle recommendations, and a recent meta-analysis.
 
-### 📈 Workflow Diagrams:
+**Personalization & Context**  
+User-provided information—such as BMI, activity, smoking, and general health—is added to the system prompt for personalized explanations. A controlled **chat memory buffer** maintains short-term context without storing unnecessary sensitive data.
+
+**Safety & Behavior**  
+The chatbot is configured to:
+- give short, clear responses,  
+- avoid diagnoses or medication advice,  
+- focus on modifiable lifestyle factors,  
+- recommend consulting a clinician when appropriate,  
+- remind users that this tool does not replace medical care.
+
+**Purpose**  
+By combining modern LLM reasoning, multilingual embeddings, and high-quality health documents, the chatbot provides clear, personalized, and reliable support throughout the heart-risk assessment workflow.
+
+## 📈 Workflow Diagrams:
 
 #### 1️⃣ System Architecture Diagram
 ```
@@ -300,35 +362,46 @@ User Input (Question / Profile Data)
 ```
 
 
-## 🚀 Final Model Deployment
+## 🚀 Deployment
+The final heart-risk prediction system is deployed as an interactive web application built with Streamlit, enabling accessible, real-time use directly in the browser. The deployment integrates all core model components into a seamless inference pipeline: data preprocessing, calibrated probability estimation, and threshold-based risk band assignment (using the optimized 0.19 cutoff). This ensures that end users receive both a clear probability of belonging to the “heart attack” class and an interpretable risk category.
 
+The streamlined Streamlit UI presents results visually, incorporates profile-aware recommendations, and connects to the RAG-powered chatbot. The entire application is deployed via GitHub and publicly accessible at https://loveyourheart.streamlit.app/
 
--- TO BE WRITTEN --
+## ⚠️ Limitations
+* **Data Source and Representativeness:** The model is trained on BRFSS 2020 survey data from the U.S., which is self-reported and subject to recall bias. Its applicability to the German population is limited and should be interpreted cautiously.
 
+* **Cross-Sectional and Binary Target:** The model predicts a binary heart-attack target and converts it to a risk percentage. BRFSS provides only a snapshot in time, so predictions reflect associations, not causation.
 
+* **False Positives and Risk Interpretation:** Despite careful threshold tuning to minimize false negatives and catch as many true high-risk users as possible, the model still produces a substantial number of false positives. Consequently, the risk percentages may overestimate actual risk for some users, and users flagged as higher risk should interpret the predictions as indicative rather than definitive.
 
-📌 Deployment includes:
+* **Feature and Clinical Limitations:** Only self-reported demographic and lifestyle features are included. Important clinical data (e.g., lab results, medications) are missing, which may limit accuracy.
 
-Preprocessing inside pipeline
-Calibrated probabilities
-Threshold-applied risk classification
-User-friendly Streamlit UI visualization
-
-## Limitations
+* **Interpretability and External Validation:** SHAP values provide some insight, but ensemble model interactions remain complex. The model has not been externally validated in German datasets, so performance may differ in practice.
 
 ## 🔮 Future Work
+- **Add clinical features**: Incorporate lab results (cholesterol, blood pressure), medications, or genetic risk factors to improve predictive accuracy.  
 
-- Add deeper clinical features
-- Time-series health monitoring
-- Include ECG/medical imaging features
-- Build API and mobile app
-- Continuous model monitoring
+- **Time-series health monitoring**: Capture longitudinal data for trends in weight, activity, blood pressure, or other vitals to better estimate evolving risk.  
+
+- **Include ECG/medical imaging features**: Integrate structured clinical data or imaging-derived biomarkers for more precise cardiovascular risk assessment.  
+
+- **Build API and mobile app**: Facilitate real-time user interaction, data collection, and integration with wearable devices for more personalized recommendations.  
+
+- **Continuous model monitoring and retraining**: Track model performance over time, particularly false positive and negative rates, and update with new data to maintain reliability.  
+
+- **Multi-modal risk estimation**: Combine self-reported data with device or sensor data (smartwatch, step counts) to reduce uncertainty in risk percentages.  
+
+- **Localization and population calibration**: Adjust model outputs to reflect the German population, considering differences from the US-based BRFSS dataset.
 
 ## 🏁 Conclusion
+This project demonstrates the development of a personalized heart-risk assessment tool based on machine learning and user-reported lifestyle data.  
 
-* Achieved better recall with good precision trade-off
-* Developed a fully interpretable and deployable model
-* Improved heart risk detection using advanced ML techniques
-* Used SHAP for transparency
-* Final model suitable for healthcare assistance tools
-            """)
+- Achieved a strong balance of high recall and reasonable precision, prioritizing detection of at-risk users.  
+- Developed a fully interpretable and deployable model that can be integrated into healthcare assistance tools.  
+- Improved heart risk detection leveraging advanced machine learning techniques and robust preprocessing.  
+- Applied SHAP values to provide transparent explanations of individual risk drivers, enabling user understanding and actionable insights.  
+
+The final model is suitable for interactive applications, supporting personalized lifestyle guidance and risk assessment, while remaining transparent and user-focused.  
+
+Looking forward, the app can be extended with richer clinical features, continuous monitoring, and integration into mobile-based health platforms to further enhance user support.
+""")
