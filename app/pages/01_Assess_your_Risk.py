@@ -510,7 +510,7 @@ with col_left:
                 with st.spinner("Estimating your heart attack risk..."):
                     # Load model and make prediction
                     PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-                    MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_soft_voting.sav") # did not work with "trained_pipe_voting.sav"
+                    MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_soft_voting.sav")
                     model = pickle.load(open(MODEL_PATH, 'rb'))
                     BACKGROUND_PATH = os.path.join(PROJECT_ROOT, "models", "background_sample.sav")
                     background_sample = pickle.load(open(BACKGROUND_PATH, 'rb'))
@@ -1007,9 +1007,10 @@ are not mistakenly classified as low risk.
 ## Shap explanation---------------------------------------------
             with st.expander("SHAP Values Explained"):
                 st.write("""
-SHAP values show how much each health factor (age, smoking, etc.) pushed the prediction higher or lower from the average baseline risk. Positive values increase heart disease risk, while negative values decrease it. All values add up to give the final prediction, explaining exactly why the model arrived at that specific percentage.
-                         [→ Learn more about SHAP](https://shap.readthedocs.io/en/latest/index.html)
-                         """)
+SHAP values show how much each health factor (age, smoking, etc.) pushes your risk higher or lower compared to the average person in the dataset (baseline risk: ~20%). Positive values (red bars) indicate factors that increase your heart disease risk above this baseline, while negative values (green bars) indicate factors that decrease it. The sum of all SHAP values plus the baseline equals your final predicted risk, explaining exactly how each factor contributed to your specific percentage. [→ Learn more about SHAP](https://shap.readthedocs.io/en/latest/index.html)  
+                         
+                         ⚠️ **Important**: These values reflect what the model learned from the data, which may contain biases or correlations that don't represent true causal relationships. For example, the model might show moderate alcohol consumption as decreasing risk due to confounding factors in the data (e.g., socioeconomic status, healthcare access), even though excessive alcohol consumption is medically known to increase cardiovascular risk. Always consult healthcare professionals for medical decisions.
+                          """)
 
 # PDF Report dowload button ------------------------------------
             # absolute path based on file location

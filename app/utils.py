@@ -14,6 +14,8 @@ def compute_shap_plot_voting(pipeline, user, user2=None, background_data=None):
     import pandas as pd
     import numpy as np
     import matplotlib.pyplot as plt
+
+    FONTSIZE = 7
     X_user_preprocessed = pipeline.named_steps["preprocess"].transform(user)
     
     # Get encoded feature names
@@ -38,7 +40,6 @@ def compute_shap_plot_voting(pipeline, user, user2=None, background_data=None):
     # Compute SHAP values (this will be SLOW without proper background data)
     shap_values = explainer.shap_values(X_user_preprocessed, nsamples=100)  # adjust nsamples for speed/accuracy tradeoff
     
-    # [REST OF YOUR CODE REMAINS THE SAME - aggregation, plotting, etc.]
     # Aggregate SHAP values by original feature
     original_importances = {}
     
@@ -54,6 +55,10 @@ def compute_shap_plot_voting(pipeline, user, user2=None, background_data=None):
             original_importances[original_feature] += shap_value
         else:
             original_importances[original_feature] = shap_value
+    
+    # Convert SHAP values to percentages (multiply by 100)
+    original_importances = {k: v * 100 for k, v in original_importances.items()}
+    
     # Convert to DataFrame
     importance_df = pd.DataFrame({
         'feature': list(original_importances.keys()),
@@ -72,6 +77,12 @@ def compute_shap_plot_voting(pipeline, user, user2=None, background_data=None):
         if isinstance(value, (int, float)):
             if value in [0, 1]:  # Binary encoded as 0/1
                 return f"{feature_name}: {'Yes' if round(value) == 1 else 'No'}"
+            elif feature_name in ['MentalHealth', 'PhysicalHealth']:
+                # Add "days" suffix for health day counts
+                return f"{feature_name}: {value} days"
+            elif feature_name == 'SleepTime':
+                # Add "hours" suffix for sleep time
+                return f"{feature_name}: {value} hours"
             else:
                 return f"{feature_name}: {value}"
         else:  # Categorical
@@ -106,6 +117,9 @@ def compute_shap_plot_voting(pipeline, user, user2=None, background_data=None):
                 whatif_importances[original_feature] += shap_value
             else:
                 whatif_importances[original_feature] = shap_value
+        
+        # Convert What-If SHAP values to percentages
+        whatif_importances = {k: v * 100 for k, v in whatif_importances.items()}
 
     # Define modifiability levels
     HIGHLY_MODIFIABLE = {
@@ -159,19 +173,19 @@ def compute_shap_plot_voting(pipeline, user, user2=None, background_data=None):
 
     # Create the plot
     fig, ax = plt.subplots(figsize=(7, 4))
-
-    bars = ax.barh(importance_df['feature'], importance_df['shap_value'], 
+    
+    bars = ax.barh(importance_df['feature_label'], importance_df['shap_value'], 
                 color=importance_df['color'], alpha=0.9)
 
-    # Add value labels on bars with modifiability markers
+    # Add value labels on bars with percentage format
     for i, (bar, value, modifiability) in enumerate(zip(bars, importance_df['shap_value'], 
                                                         importance_df['modifiability'])):
-        label_x = value + (0.002 if value > 0 else -0.002)
+        label_x = value + (0.05 if value > 0 else -0.05)  # Adjusted for percentage scale
         alignment = 'left' if value > 0 else 'right'
                                             
         ax.text(label_x, bar.get_y() + bar.get_height()/2, 
-                f'{value:.2f}', 
-                va='center', ha=alignment, fontsize=8)
+                f'{value:.1f}%', 
+                va='center', ha=alignment, fontsize=FONTSIZE)
 
     # Plot What-If scenario as blue dots if available
     if whatif_importances is not None and changed_features:
@@ -181,26 +195,26 @@ def compute_shap_plot_voting(pipeline, user, user2=None, background_data=None):
             if feature in changed_features and feature in whatif_importances:
                 whatif_value = whatif_importances[feature]
                 # Use the enumerated position in the sorted dataframe
-                y_position = list(importance_df['feature']).index(feature)
+                y_position = list(importance_df['feature_label']).index(row['feature_label'])
                 
                 # Plot blue dot
                 ax.plot(whatif_value, y_position, 'o', color='#0055A4', 
-                       markersize=7, zorder=5)
+                       markersize=FONTSIZE, zorder=5)
                 
-                # Add label for What-If value
-                label_x = whatif_value#whatif_value + (0.02 if whatif_value > 0 else -0.02)
+                # Add label for What-If value with percentage
+                label_x = whatif_value
                 alignment = 'left' if whatif_value > 0 else 'right'
-                ax.text(label_x, y_position, f'  {whatif_value:.2f}  ', 
-                       va='center', ha=alignment, fontsize=8, 
+                ax.text(label_x, y_position, f'  {whatif_value:.1f}%  ', 
+                       va='center', ha=alignment, fontsize=FONTSIZE, 
                        color='#0055A4')
 
     # Add vertical line at zero
     ax.axvline(x=0, color='black', linestyle='-', linewidth=1)
 
     # Labels and title
-    ax.set_xlabel('SHAP Value (Impact on Risk)', fontsize=8)
-    ax.tick_params(axis="y", labelsize=8)
-    ax.tick_params(axis="x", labelsize=8)
+    ax.set_xlabel('SHAP Value (Impact on Risk %)', fontsize=FONTSIZE)
+    ax.tick_params(axis="y", labelsize=FONTSIZE)
+    ax.tick_params(axis="x", labelsize=FONTSIZE)
 
     # Add legend
     from matplotlib.patches import Patch
@@ -219,15 +233,16 @@ def compute_shap_plot_voting(pipeline, user, user2=None, background_data=None):
     if whatif_importances is not None and changed_features:
         legend_elements.append(
             Line2D([0], [0], marker='o', color='w', markerfacecolor='#0055A4', 
-                   markersize=8, label='What-If Scenario', markeredgecolor='white')
+                   markersize=FONTSIZE, label='What-If Scenario', markeredgecolor='white')
         )
     
-    ax.legend(handles=legend_elements, loc='best', fontsize=8, framealpha=0)
+    ax.legend(handles=legend_elements, loc='best', fontsize=FONTSIZE, framealpha=0)
 
     # Grid
     ax.grid(axis='x', alpha=0.3, linestyle='--')
     ax.set_axisbelow(True)
     for spine in ["top", "right", "left"]:
         ax.spines[spine].set_visible(False)
-
+    current_xlim = ax.get_xlim()
+    ax.set_xlim(left=current_xlim[0] * 1.1, right=current_xlim[1])  # Extend left by 10%
     return fig, importance_df
