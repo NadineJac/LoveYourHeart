@@ -182,7 +182,7 @@ def create_pdf_report(user_df, risk_value, ci_low, ci_high, what_if_df=None, wha
     story = []
 
     # Title
-    story.append(Paragraph("Love Your Heart - Heart Risk Report", heading_style))
+    story.append(Paragraph("Love Your Heart - Heart Event Report", heading_style))
     story.append(Spacer(1, 12))
 
     # Original user data
@@ -192,7 +192,7 @@ def create_pdf_report(user_df, risk_value, ci_low, ci_high, what_if_df=None, wha
     original_data = [["Parameter", "Value"]]
     for col, val in user_df.loc[0].items():
         original_data.append([col, str(val)])
-    original_data.append(["Predicted Risk (%)", f"{risk_value:.2f}%"])
+    original_data.append(["Predicted Score (%)", f"{risk_value:.2f}%"])
     original_data.append(["Confidence Interval (%)", f"{ci_low:.2f}% - {ci_high:.2f}%"])
 
     table = Table(original_data, hAlign='LEFT', colWidths=[180, 180])
@@ -219,7 +219,7 @@ def create_pdf_report(user_df, risk_value, ci_low, ci_high, what_if_df=None, wha
         for col, val in what_if_df.loc[0].items():
             what_if_data.append([col, str(val)])
         if what_if_risk is not None:
-            what_if_data.append(["Predicted Risk (%)", f"{what_if_risk:.2f}%"])
+            what_if_data.append(["Predicted Score (%)", f"{what_if_risk:.2f}%"])
             what_if_data.append(["Confidence Interval (%)", f"{lower_ci2:.1f}% – {upper_ci2:.1f}%"])
         
         table2 = Table(what_if_data, hAlign='LEFT', colWidths=[180, 180])
@@ -269,8 +269,8 @@ def display_changes_compact(user, user2):
 #--------------------------------------------------------------------------
 
 # Page config
-st.set_page_config(page_title="Assess your Risk", page_icon="❤️", layout="wide")
-st.title(" ❤️ Get your cardiovascular risk profile")
+st.set_page_config(page_title="Get Your Score", page_icon="❤️", layout="wide")
+st.title(" ❤️ Get your heart event score")
 
  # Initialize session state if not exists
 if "profile_submitted" not in st.session_state:
@@ -284,11 +284,11 @@ col_left, col_right = st.columns([1, 2], gap="large")
 with col_left:
     with st.expander("How it works"):
         st.markdown("""
-    1. **Enter Your Health Information:** Provide details about your lifestyle and health factors such as age, BMI, smoking status, physical activity, and medical history. These are the inputs our machine learning model uses to estimate your heart disease risk.
-    2. **Get Your Personalized Risk Score:** Once you submit your information, the app instantly calculates your risk level and displays it as an easy-to-read gauge (Low, Moderate, or High risk).
-    3. **Understand What Matters Most:** Our model highlights which factors have the greatest impact on your risk score—these are called modifiable factors: lifestyle behaviors and health conditions you can actively change, such as smoking, physical activity, diet, and weight management.
-    4. **Explore "What-If" Scenarios:** Curious how quitting smoking or increasing exercise could affect your risk? Use the interactive tool to adjust specific factors and see how your risk score changes in real-time.
-    5. **Download Your Results:** Save a copy of your risk assessment and personalized recommendations for your records or to share with your healthcare provider.
+    1. **Enter Your Health Information:** Provide details about your lifestyle and health factors such as age, BMI, smoking status, physical activity, and medical history. These are the inputs our machine learning model uses to estimate your heart event score.
+    2. **Get Your Personalized Heart Event Score:** Once you submit your information, the app instantly calculates your heart event score and displays it as an easy-to-read gauge.
+    3. **Understand What Matters Most:** Our model highlights which factors have the greatest impact on your score. Some of them are modifiable, i.e. lifestyle behaviors and health conditions you can actively change, such as smoking, physical activity, diet, and weight management.
+    4. **Explore "What-If" Scenarios:** Curious how quitting smoking or increasing exercise could affect your score? Use the interactive tool to adjust specific factors and see how your score changes in real-time.
+    5. **Download Your Results:** Save a copy of your assessment and personalized recommendations for your records or to share with your healthcare provider.
                 """)
         st.write("")
 
@@ -475,7 +475,7 @@ with col_left:
             st.write(":gray[Please fill out all fields to enable saving your profile.]", )
             all_filled = all(v not in (None, "", []) for v in required_fields.values())
             # Submit button to save profile
-            if st.form_submit_button("💾 Save Profile & Get Risk Estimate",
+            if st.form_submit_button("💾 Save Profile & Get Score",
                 type="primary",
                 use_container_width=True,
                 #disabled=not all_filled # did not get to work with form
@@ -519,7 +519,7 @@ with col_left:
                 st.session_state["physhealth_value"] = physhealth_value     
 
                 
-                with st.spinner("Estimating your heart attack risk..."):
+                with st.spinner("Estimating your heart event score..."):
                     # Load model and make prediction
                     PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
                     MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "trained_pipe_soft_voting.sav")
@@ -697,7 +697,7 @@ with col_left:
                     st.write("")
 
                 # Submit button to save profile
-                if st.form_submit_button("💾 Save 'What if'-Scenario & Get Risk Estimate",
+                if st.form_submit_button("💾 Save 'What if'-Scenario & Get Score",
                     key = "prediction_input_whatif",
                     type="primary",
                     use_container_width=True): 
@@ -715,7 +715,7 @@ with col_left:
                     else:
                         alc_cat = "No"
                     
-                    with st.spinner("Estimating your heart attack risk..."):
+                    with st.spinner("Estimating your heart event score..."):
                         user2 = pd.DataFrame({             
                             'Sex': [sex_value],
                             'Age': [age_value],
@@ -768,7 +768,7 @@ with col_left:
         with col_right:
             col1, col2 = st.columns([1,1])
             with col1:
-                st.write("#### Your current heart attack risk factor:", str(st.session_state["risk_value"]),"%")
+                st.write("#### Your current heart event score:", str(st.session_state["risk_value"]),"%")
             
                 # Confidence Interval(CI)
                 cache_key = "ci_result"
@@ -801,8 +801,8 @@ This score reflects how similar your answers are to people in the survey who rep
 **95% Confidence Interval:**
 We're 95% confident your actual score falls somewhere in this range. The wider the range, the less certain we are about the exact number.
 
-**Risk category:**                             
-Below you can find your risk category.  We divide the probability score into different risk categories using thresholds  
+**Score category:**                             
+Below you can find your score category.  We divide the probability score into different score categories using thresholds  
 chosen to *reduce false negatives* in the high-risk group.
 
 A *false negative* means the model predicts *“low risk”* even though the
@@ -832,12 +832,12 @@ are not mistakenly classified as low risk.
 
                     # Assemble infobox content
                     info_text = ["#### 💭 What if?"]
-                    info_text.append("##### Changed Risk Factors")
+                    info_text.append("##### Changed Factors")
 
                     if differences:                        
                         info_text.extend(differences)
                         info_text.append(
-                            f"##### What-If Heart Attack Risk: **{st.session_state['risk_value2']}%**"
+                            f"##### What-if heart event score: **{st.session_state['risk_value2']}%**"
                         )
                         info_text.append(f"🔎 **95% Confidence Interval:** {lower_ci2:.1f}% – {upper_ci2:.1f}%")
                     else:
@@ -848,7 +848,7 @@ are not mistakenly classified as low risk.
 # Gauge plot ----------------------------------------------------------
             
             # Get risk value and compute confidence interval
-            with st.spinner("Plotting your risk..."):
+            with st.spinner("Plotting your score..."):
                 risk_percent = st.session_state["risk_value"]
                 lower_ci, upper_ci = st.session_state["ci_result"]
 
@@ -866,7 +866,7 @@ are not mistakenly classified as low risk.
                     },
 
                     title={
-                        "text": "<b>Heart Risk Level</b>",
+                        "text": "<b>Heart Event Score</b>",
                         "font": {"size": 26, "family": "Arial, sans-serif", "color": "#880E4F"}
                     },
 
@@ -1015,9 +1015,9 @@ are not mistakenly classified as low risk.
 ## Shap explanation---------------------------------------------
             with st.expander("SHAP Values Explained"):
                 st.write("""
-SHAP values show how much each health factor (age, smoking, etc.) pushes your risk higher or lower compared to the average person in the dataset (baseline risk: ~20%). Positive values (red bars) indicate factors that increase your heart disease risk above this baseline, while negative values (green bars) indicate factors that decrease it. The sum of all SHAP values plus the baseline equals your final predicted risk, explaining exactly how each factor contributed to your specific percentage. [→ Learn more about SHAP](https://shap.readthedocs.io/en/latest/index.html)  
+SHAP values show how much each health factor (age, smoking, etc.) pushes your score higher or lower compared to the average person in the dataset (baseline score: ~20%). Positive values (red bars) indicate factors that increase your heart event score above this baseline, while negative values (green bars) indicate factors that decrease it. The sum of all SHAP values plus the baseline equals your final predicted score, explaining exactly how each factor contributed to your specific percentage. [→ Learn more about SHAP](https://shap.readthedocs.io/en/latest/index.html)  
                          
-⚠️ **Important**: These values reflect what the model learned from the data, which may contain biases or correlations that don't represent true causal relationships. For example, the model might show moderate alcohol consumption as decreasing risk due to confounding factors in the data (e.g., socioeconomic status, healthcare access), even though excessive alcohol consumption is medically known to increase cardiovascular risk. Always consult healthcare professionals for medical decisions.
+⚠️ **Important**: These values reflect what the model learned from the data, which may contain biases or correlations that don't represent true causal relationships. For example, the model might show moderate alcohol consumption as decreasing scores due to confounding factors in the data (e.g., socioeconomic status, healthcare access), even though excessive alcohol consumption is medically known to increase cardiovascular risk. Always consult healthcare professionals for medical decisions.
                           """)
 
 # PDF Report dowload button ------------------------------------
@@ -1098,6 +1098,3 @@ SHAP values show how much each health factor (age, smoking, etc.) pushes your ri
             st.write("Head to the AI Assistant for personalized advice based on your profile.")              
             if st.button("Go to AI Assistant →", key="cta4"):
                 st.switch_page("pages/02_AI_Assistance.py")
-
-
-
