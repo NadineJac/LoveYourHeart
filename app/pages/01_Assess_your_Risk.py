@@ -59,10 +59,18 @@ def compute_shap_plot_voting_cached(_model, _user_df, _user2_df, _background_sam
     """Cached version of SHAP plot computation"""
     # Convert dataframes to hashable format for caching
     return compute_shap_plot_voting(_model, _user_df, user2=_user2_df, background_data=_background_sample)
-@st.cache_data(show_spinner=False)
-def bootstrap_confidence_interval_cached(_model, _user_df):
-    """Cached version of bootstrap confidence interval computation"""
-    return bootstrap_confidence_interval_single_row(_model, _user_df)
+
+@st.cache_data(
+    show_spinner=False,
+    hash_funcs={
+        pd.DataFrame: lambda df: tuple(sorted(df.iloc[0].to_dict().items()))
+    }
+)
+def bootstrap_confidence_interval_cached(_model, user_df):
+    return bootstrap_confidence_interval_single_row(_model, user_df)
+
+
+
 
 ## Scrolling
 if 'scroll_to_top' not in st.session_state:
@@ -806,14 +814,14 @@ are not mistakenly classified as low risk.
                     X_user = st.session_state["user_data"]
                     X_user2 = st.session_state["user_data2"]
 
-                    cache_key = "ci_result_whatif"
-                    if cache_key not in st.session_state:
+                    cache_key2 = f"ci_result_whatif_{hash(X_user2.to_json())}"
+                    if cache_key2 not in st.session_state:
                         with st.spinner("Running the simulation..."):
                             model = st.session_state["model"]                           
-                            lower_ci2, upper_ci2 = bootstrap_confidence_interval_cached(model, X_user)
-                            st.session_state[cache_key] = (lower_ci2, upper_ci2)
+                            lower_ci2, upper_ci2 = bootstrap_confidence_interval_cached(model, X_user2)
+                            st.session_state[cache_key2] = (lower_ci2, upper_ci2)
                     else:
-                        lower_ci2, upper_ci2 = st.session_state[cache_key]
+                        lower_ci2, upper_ci2 = st.session_state[cache_key2]
                     
                     # Collect changes
                     differences = display_changes_compact(X_user, X_user2)                       
@@ -827,11 +835,7 @@ are not mistakenly classified as low risk.
                         info_text.append(
                             f"##### What-If Heart Attack Risk: **{st.session_state['risk_value2']}%**"
                         )
-
-                        info_text.append(
-                            f"🔎 **95% Confidence Interval:** "
-                            f"{lower_ci2:.1f}% – {upper_ci2:.1f}%"
-                        )
+                        info_text.append(f"🔎 **95% Confidence Interval:** {lower_ci2:.1f}% – {upper_ci2:.1f}%")
                     else:
                         info_text.append("_No changes detected._")   
                     # Display everything in one infobox
