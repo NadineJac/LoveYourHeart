@@ -12,7 +12,7 @@ A comprehensive end-to-end health analytics & ML project focused on predicting a
     - [1️⃣ Class Imbalance](#1️⃣-class-imbalance)
     - [2️⃣ Numerical Feature Distributions](#2️⃣-numerical-feature-distributions)
     - [3️⃣ Categorical Feature Distributions](#3️⃣-categorical-feature-distributions)
-    - [4️⃣ 📌 Correlation Heatmap](#4️⃣--correlation-heatmap)
+    - [4️⃣ Correlation Heatmap](#4️⃣-correlation-heatmap)
   - [🧼 Data Preprocessing](#-data-preprocessing)
   - [🤖 Modeling Approach](#-modeling-approach)
     - [🎯 Hyperparameter Tuning](#-hyperparameter-tuning)
@@ -40,20 +40,17 @@ A comprehensive end-to-end health analytics & ML project focused on predicting a
   - [🏁 Conclusion](#-conclusion)
 
 ## 🧩 Project Overview
-
 We build a machine learning model that predicts the likelihood of heart disease based on a users lifestyle, medical history, and health metrics.
 The model is deployed as an interactive Streamlit-app allow users to assess their risk score.
 This documentation summarizes the entire workflow, decisions taken, trade-offs, and final model deployment strategy.
 
 ## ❗ Problem Statement
-
 Heart disease, including heart attacks, remains one of the world’s leading causes of death. Early detection can significantly improve survival rates. The goal of this project is to:
 * Build a predictive model that produces a probability score of belonging to the heart attack class (0–100%)
 * Minimize false negatives (missed high-risk cases)
 * Provide users with explainable and actionable insights
 
 ## 📊 Dataset Description
-
 **Dataset used:** BRFSS_2020_Heart_Disease_Dataset - https://zenodo.org/records/15364962
 Contains 320,000+ rows and 18 features across:
 
@@ -96,7 +93,7 @@ Categorical features such as Sex, Smoking, AlcoholDrinking, and Diabetic exhibit
 
 ![Categorical Feature Distributions](images/img_catFeature_distribution.png)
 
-### 4️⃣ 📌 Correlation Heatmap
+### 4️⃣ Correlation Heatmap
 
 ![Correlation Heatmap](images/img_corr_heatmap1to-1.png)
 
