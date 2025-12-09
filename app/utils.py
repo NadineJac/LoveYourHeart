@@ -173,7 +173,7 @@ def compute_shap_plot_voting(pipeline, user, user2=None, background_data=None):
 
     # Create the plot
     fig, ax = plt.subplots(figsize=(7, 4))
-    
+
     bars = ax.barh(importance_df['feature_label'], importance_df['shap_value'], 
                 color=importance_df['color'], alpha=0.9)
 
@@ -185,7 +185,7 @@ def compute_shap_plot_voting(pipeline, user, user2=None, background_data=None):
                                             
         ax.text(label_x, bar.get_y() + bar.get_height()/2, 
                 f'{value:.1f}%', 
-                va='center', ha=alignment, fontsize=FONTSIZE)
+                va='center', ha=alignment, fontsize=8)
 
     # Plot What-If scenario as blue dots if available
     if whatif_importances is not None and changed_features:
@@ -243,6 +243,7 @@ def compute_shap_plot_voting(pipeline, user, user2=None, background_data=None):
     ax.set_axisbelow(True)
     for spine in ["top", "right", "left"]:
         ax.spines[spine].set_visible(False)
+
     current_xlim = ax.get_xlim()
     ax.set_xlim(left=current_xlim[0] * 1.1, right=current_xlim[1])  # Extend left by 10%
     return fig, importance_df
