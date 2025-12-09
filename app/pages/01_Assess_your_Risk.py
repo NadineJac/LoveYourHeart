@@ -500,8 +500,6 @@ with col_left:
                     model = pickle.load(open(MODEL_PATH, 'rb'))
                     BACKGROUND_PATH = os.path.join(PROJECT_ROOT, "models", "background_sample.sav")
                     background_sample = pickle.load(open(BACKGROUND_PATH, 'rb'))
-                    voting_threshold = pickle.load(open(os.path.join(
-                        PROJECT_ROOT, "models", "trained_pipe_voting_threshold.sav"), 'rb'))
 
                     user = pd.DataFrame({             
                         'Sex': [sex_value],
@@ -914,9 +912,9 @@ are not mistakenly classified as low risk.
             # End Gauge chart
 
 ## Risk tiers -------------------------------------------------------
-            if st.session_state["risk_value"] >= 35:
+            if st.session_state["risk_value"] >= 40:
                 st.error("🚨 High Risk! Please consult a healthcare professional for a comprehensive evaluation.")
-            elif st.session_state["risk_value"] >= voting_threshold:
+            elif st.session_state["risk_value"] >= 19:
                 st.warning("⚠️ Moderate Risk. Consider lifestyle changes and regular check-ups.") 
             else:
                 st.info("✅ Low Risk. Maintain a healthy lifestyle to keep your risk low.") 
