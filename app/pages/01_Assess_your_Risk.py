@@ -914,9 +914,9 @@ are not mistakenly classified as low risk.
             # End Gauge chart
 
 ## Risk tiers -------------------------------------------------------
-            if st.session_state["risk_value"] >= 25:
+            if st.session_state["risk_value"] >= 35:
                 st.error("🚨 High Risk! Please consult a healthcare professional for a comprehensive evaluation.")
-            elif st.session_state["risk_value"] >= 10:
+            elif st.session_state["risk_value"] >= voting_threshold:
                 st.warning("⚠️ Moderate Risk. Consider lifestyle changes and regular check-ups.") 
             else:
                 st.info("✅ Low Risk. Maintain a healthy lifestyle to keep your risk low.") 
