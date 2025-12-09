@@ -34,7 +34,7 @@ A comprehensive end-to-end health analytics & ML project focused on predicting a
   - [📈 Workflow Diagrams:](#-workflow-diagrams)
       - [1️⃣ System Architecture Diagram](#1️⃣-system-architecture-diagram)
       - [2️⃣ Chatbot Workflow Diagram](#2️⃣-chatbot-workflow-diagram)
-  - [🚀 Final Model Deployment](#-final-model-deployment)
+  - [🚀 Deployment](#-deployment)
   - [⚠️ Limitations](#️-limitations)
   - [🔮 Future Work](#-future-work)
   - [🏁 Conclusion](#-conclusion)
@@ -230,8 +230,8 @@ We use [SHAP](https://shap.readthedocs.io/) (SHapley Additive exPlanations) to m
 Our final model is a VotingClassifier combining tree-based and linear models.
 TreeExplainer cannot explain this ensemble, so we use the [*KernelExplainer*](https://shap.readthedocs.io/en/latest/generated/shap.KernelExplainer.html), which is 
 
-    + Model-agnostic
-    - Slower, only returns approximated importances and depends heavily on chosen background data 
+➕ Model-agnostic  
+➖ Slower, only returns approximated importances and depends heavily on chosen background data 
 
 ### How SHAP is used in this project
 1. **Preprocessing:**   SHAP is applied after full preprocessing (encoding, scaling, imputation) to ensure consistent explanations.
@@ -341,19 +341,10 @@ User Input (Question / Profile Data)
 ```
 
 
-## 🚀 Final Model Deployment
+## 🚀 Deployment
+The final heart-risk prediction system is deployed as an interactive web application built with Streamlit, enabling accessible, real-time use directly in the browser. The deployment integrates all core model components into a seamless inference pipeline: data preprocessing, calibrated probability estimation, and threshold-based risk band assignment (using the optimized 0.19 cutoff). This ensures that end users receive both a clear probability of belonging to the “heart attack” class and an interpretable risk category.
 
-
--- TO BE WRITTEN --
-
-
-
-📌 Deployment includes:
-
-Preprocessing inside pipeline
-Calibrated probabilities
-Threshold-applied risk classification
-User-friendly Streamlit UI visualization
+The streamlined Streamlit UI presents results visually, incorporates profile-aware recommendations, and connects to the RAG-powered chatbot. The entire application is deployed via GitHub and publicly accessible at https://loveyourheart.streamlit.app/
 
 ## ⚠️ Limitations
 * **Data Source and Representativeness:** The model is trained on BRFSS 2020 survey data from the U.S., which is self-reported and subject to recall bias. Its applicability to the German population is limited and should be interpreted cautiously.
@@ -367,7 +358,7 @@ User-friendly Streamlit UI visualization
 * **Interpretability and External Validation:** SHAP values provide some insight, but ensemble model interactions remain complex. The model has not been externally validated in German datasets, so performance may differ in practice.
 
 ## 🔮 Future Work
-**Add clinical features**: Incorporate lab results (cholesterol, blood pressure), medications, or genetic risk factors to improve predictive accuracy.  
+- **Add clinical features**: Incorporate lab results (cholesterol, blood pressure), medications, or genetic risk factors to improve predictive accuracy.  
 
 - **Time-series health monitoring**: Capture longitudinal data for trends in weight, activity, blood pressure, or other vitals to better estimate evolving risk.  
 
@@ -380,7 +371,7 @@ User-friendly Streamlit UI visualization
 - **Multi-modal risk estimation**: Combine self-reported data with device or sensor data (smartwatch, step counts) to reduce uncertainty in risk percentages.  
 
 - **Localization and population calibration**: Adjust model outputs to reflect the German population, considering differences from the US-based BRFSS dataset.
-- 
+
 ## 🏁 Conclusion
 This project demonstrates the development of a personalized heart-risk assessment tool based on machine learning and user-reported lifestyle data.  
 
