@@ -98,7 +98,7 @@ Categorical features such as Sex, Smoking, AlcoholDrinking, and Diabetic exhibit
 
 ### 4️⃣ 📌 Correlation Heatmap
 
-![Correlation Heatmap](images/img_corr_heatmap.png)
+![Correlation Heatmap](images/img_corr_heatmap1to-1.png)
 
 The heatmap helps identify which features are most strongly related to heart disease risk. Features like age, sex, smoking, alcohol comsumption, are positively correlated with risk, while lifestyle-related features such as physical activity and adequate sleep are negatively correlated. These insights can guide feature selection
 and interpretation in predictive modeling.
