@@ -3,6 +3,7 @@
 import os
 import hashlib
 from io import BytesIO
+import pickle
 
 # Data manipulation and numerical computing
 import numpy as np
