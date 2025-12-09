@@ -29,6 +29,13 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix
 import shap
 import hashlib
+# Call the LLM + RAG system
+from llama_index.llms.groq import Groq
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.core import StorageContext, load_index_from_storage
+from llama_index.core.chat_engine import ContextChatEngine
+from llama_index.core.memory import ChatMemoryBuffer
+from llama_index.core.base.llms.types import ChatMessage, MessageRole
 
 #----------------------------------------------------------------------------
 ### Define functions
@@ -204,6 +211,15 @@ def create_pdf_report(user_df, risk_value, ci_low, ci_high, what_if_df=None, wha
         ]))
         story.append(table2)
         story.append(Spacer(1, 20))
+
+    # AI Initial Recommendation Section
+    story.append(Paragraph("Initial Recommendation", sub_heading_style))
+    story.append(Spacer(1, 10))
+
+    ai_reco = initial_recommendation or "No recommendation available."
+    ai_reco = ai_reco.replace("\n", "<br/>")
+    story.append(Paragraph(ai_reco, normal_style))
+    story.append(Spacer(1, 20))
 
     doc.build(story)
     buffer.seek(0)
@@ -1178,6 +1194,47 @@ SHAP values show how much each health factor (age, smoking, etc.) pushed the pre
                          """)
 
 # PDF Report dowload button ------------------------------------
+            # absolute path based on file location
+            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+            VECTOR_INDEX_DIR = os.path.join(BASE_DIR, "..", "content", "vector_index")
+            VECTOR_INDEX_DIR = os.path.normpath(VECTOR_INDEX_DIR)
+            
+            EMBEDDING_DIR = os.path.join(BASE_DIR, "..", "content", "embedding_model")
+            EMBEDDING_DIR = os.path.normpath(EMBEDDING_DIR)
+            # Recommendations
+            profile_text = "User profile information:\n"
+            for k,v in user.items():
+                profile_text += f"- {k}: {v}\n"
+
+            profile_text += "\nUse this information when generating health recommendations.\n"
+
+            # Initialize LLM
+            llm = Groq(model="llama-3.3-70b-versatile", token=st.secrets["GROQ_API_KEY"])
+
+            # Load embeddings & vector index (same as AI Assistant)
+            embeddings = HuggingFaceEmbedding(model_name="sentence-transformers/distiluse-base-multilingual-cased-v1")
+            # load Vector Database
+            storage_context = StorageContext.from_defaults(persist_dir=VECTOR_INDEX_DIR)
+            vector_index = load_index_from_storage(storage_context, embed_model=embeddings)
+            retriever = vector_index.as_retriever(similarity_top_k=2)
+
+            # Chat engine
+            memory = ChatMemoryBuffer.from_defaults()
+            rag_bot = ContextChatEngine(llm=llm, retriever=retriever, memory=memory, 
+                                        prefix_messages=[ChatMessage(role=MessageRole.SYSTEM, content=profile_text)])
+
+            # Generate initial recommendation
+            answer = rag_bot.chat(
+                "\nRules:\n"
+                "- Output ONLY 3–4 short bullet points (<25 words each).\n"
+                "- Use the user profile to give personalized health advice.\n"
+                "- If Smoking='Yes' → include smoking cessation advice.\n"
+                "- If Diabetes='Yes' → include diet & glucose control advice.\n"
+                "- If Alcohol Drinking > 0 → user drinks → give alcohol reduction advice.\n"
+                "- If Alcohol Drinking = 0 → user does not drink → acknowledge positively.\n"
+                "- Never ignore any risk factor present.\n"
+            )
+            initial_recommendation = answer.response
            # Prepare the what-if data only if exists
             what_if_df = st.session_state.get("user_data2", None)
             what_if_risk = st.session_state.get("risk_value2", None)
