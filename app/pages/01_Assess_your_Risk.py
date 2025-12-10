@@ -1,52 +1,41 @@
-### Load libraries
-# Core Python
-import os
-import hashlib
-from io import BytesIO
-import pickle
-
-# Data manipulation and numerical computing
-import numpy as np
-import pandas as pd
-
-# Visualization
-import matplotlib.pyplot as plt
-import plotly.graph_objects as go
-
-# Machine Learning - sklearn
-from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, VotingClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-
-# Machine Learning - other
-from imblearn.over_sampling import SMOTE
-from imblearn.pipeline import Pipeline as ImbPipeline
-from xgboost import XGBClassifier
-
-# Explainability
-import shap
-
-# PDF generation
-from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-
-# LLM and RAG
-from llama_index.core import StorageContext, load_index_from_storage
-from llama_index.core.base.llms.types import ChatMessage, MessageRole
-from llama_index.core.chat_engine import ContextChatEngine
-from llama_index.core.memory import ChatMemoryBuffer
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from llama_index.llms.groq import Groq
-
-# Streamlit
 import streamlit as st
 from streamlit_scroll_to_top import scroll_to_here
+import os
+import plotly.graph_objects as go
+import pickle
+import pandas as pd
+import shap
+from streamlit_scroll_to_top import scroll_to_here
+import numpy as np
+import matplotlib.pyplot as plt
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER
+from io import BytesIO
+from utils import compute_shap_plot_voting
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline as ImbPipeline
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, VotingClassifier
+from xgboost import XGBClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix
+import shap
+import hashlib
+# Call the LLM + RAG system
+from llama_index.llms.groq import Groq
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.core import StorageContext, load_index_from_storage
+from llama_index.core.chat_engine import ContextChatEngine
+from llama_index.core.memory import ChatMemoryBuffer
+from llama_index.core.base.llms.types import ChatMessage, MessageRole
+
 
 # Local utilities
 from utils import compute_shap_plot_voting
