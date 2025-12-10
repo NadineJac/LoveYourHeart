@@ -107,8 +107,8 @@ Visit [loveyourheart.streamlit.app](https://loveyourheart.streamlit.app) to use 
 ```
 
 4. **Run the notebooks**
-   - Start with [01_EDA.ipynb](notebooks/01_EDA.ipynb) for data exploration
-   - Continue with [02_modeling.ipynb](notebooks/02_modeling.ipynb) for model development
+   - Start with [heart_risk_model_improve2.ipynb](notebooks/heart_risk_model_improve2.ipynb) for model development
+   - The used mdel is in [heart_risk_votingModel.ipynb](notebooks/heart_risk_votingModel.ipynb)
 
 5. **Launch the Streamlit app locally**
 ```bash
